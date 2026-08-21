@@ -24,6 +24,7 @@ const navigation = [
   { href: '/blog/', label: 'Blog' },
   { href: '/pensamentos/', label: 'Pensamentos' },
   { href: '/sobre/', label: 'Sobre' },
+  { href: '/contato/', label: 'Contato' },
 ];
 
 const isActive = (href: string) =>
@@ -72,8 +73,12 @@ const isActive = (href: string) =>
       </main>
 
       <footer class="site-footer">
-        <span>IA · Scraping · Backend</span>
-        <span>Jardim digital · {new Date().getFullYear()}</span>
+        <span>{siteConfig.name} · Rio de Janeiro</span>
+        <span class="footer-links">
+          <a href={siteConfig.links.github} rel="me">GitHub</a>
+          <a href={siteConfig.links.linkedin} rel="me">LinkedIn</a>
+          <span>Jardim digital · {new Date().getFullYear()}</span>
+        </span>
       </footer>
     </div>
   </body>
@@ -169,6 +174,18 @@ const isActive = (href: string) =>
     color: var(--muted);
   }
 
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem 1rem;
+  }
+
+  .footer-links a {
+    color: var(--ink);
+    text-underline-offset: 0.2em;
+  }
+
   @media (max-width: 46rem) {
     .site-frame {
       width: min(100% - 2rem, 42rem);
@@ -193,7 +210,7 @@ const isActive = (href: string) =>
       justify-content: flex-start;
     }
 
-    .site-footer span:last-child {
+    .footer-links > span {
       display: none;
     }
   }

@@ -31,12 +31,22 @@ const { Content } = await render(entry);
   backHref="/projetos/"
   backLabel="Projetos"
 >
-  {(entry.data.role || entry.data.stack.length > 0 || entry.data.outcome) && (
-    <dl slot="details" class="project-facts">
-      {entry.data.role && <div><dt>Papel</dt><dd>{entry.data.role}</dd></div>}
-      {entry.data.stack.length > 0 && <div><dt>Stack</dt><dd>{entry.data.stack.join(' · ')}</dd></div>}
-      {entry.data.outcome && <div><dt>Resultado</dt><dd>{entry.data.outcome}</dd></div>}
-    </dl>
+  {(entry.data.role || entry.data.stack.length > 0 || entry.data.outcome || entry.data.repository || entry.data.demo) && (
+    <div slot="details" class="project-details">
+      {(entry.data.role || entry.data.stack.length > 0 || entry.data.outcome) && (
+        <dl class="project-facts">
+          {entry.data.role && <div><dt>Papel</dt><dd>{entry.data.role}</dd></div>}
+          {entry.data.stack.length > 0 && <div><dt>Stack</dt><dd>{entry.data.stack.join(' · ')}</dd></div>}
+          {entry.data.outcome && <div><dt>Resultado</dt><dd>{entry.data.outcome}</dd></div>}
+        </dl>
+      )}
+      {(entry.data.repository || entry.data.demo) && (
+        <div class="project-links">
+          {entry.data.repository && <a href={entry.data.repository}>Ver repositório <span aria-hidden="true">↗</span></a>}
+          {entry.data.demo && <a href={entry.data.demo}>Abrir demonstração <span aria-hidden="true">↗</span></a>}
+        </div>
+      )}
+    </div>
   )}
 
   <Content />
@@ -46,7 +56,7 @@ const { Content } = await render(entry);
   .project-facts {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin: 0 0 3rem;
+    margin: 0;
     border: 1px solid var(--line);
   }
 
@@ -70,6 +80,29 @@ const { Content } = await render(entry);
   dd {
     margin: 0;
     font: 600 0.85rem/1.5 var(--ui);
+  }
+
+  .project-details {
+    margin: 0 0 3rem;
+  }
+
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    padding-top: 1rem;
+  }
+
+  .project-links a {
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--ink);
+    color: var(--ink);
+    font: 700 0.78rem/1.5 var(--ui);
+    text-decoration: none;
+  }
+
+  .project-links span {
+    color: var(--accent);
   }
 
   @media (max-width: 38rem) {

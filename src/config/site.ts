@@ -1,7 +1,14 @@
 export const siteConfig = {
-  title: 'Portfólio & Jardim Digital',
-  shortTitle: 'P/JD',
-  description: 'Projetos, artigos e pensamentos sobre IA, scraping e engenharia de back-end.',
+  name: 'Pedro Grangeiro',
+  title: 'Pedro Grangeiro — Portfólio & Jardim Digital',
+  shortTitle: 'PG',
+  description: 'Portfólio de Pedro Grangeiro: inteligência artificial, Python, dados, scraping e engenharia de back-end.',
   language: 'pt-BR',
-  specialties: ['Inteligência artificial', 'Web scraping', 'Back-end'],
+  role: 'AI Engineer & Backend Developer',
+  location: 'Rio de Janeiro, Brasil',
+  specialties: ['Inteligência artificial', 'Engenharia de dados', 'Back-end'],
+  links: {
+    github: 'https://github.com/pedrograngeiro',
+    linkedin: 'https://www.linkedin.com/in/pedro-grangeiro/',
+  },
 } as const;

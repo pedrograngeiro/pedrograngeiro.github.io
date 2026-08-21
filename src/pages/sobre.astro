@@ -1,56 +1,152 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { siteConfig } from '../config/site';
 ---
 
-<BaseLayout title="Sobre" description="Sobre o trabalho e a proposta deste portfólio.">
+<BaseLayout title="Sobre" description="Sobre Pedro Grangeiro, sua atuação em inteligência artificial, back-end, dados e formação em computação.">
   <div class="page-shell">
     <header class="page-intro">
       <div class="page-intro__copy">
-        <p class="kicker">04 / Contexto</p>
-        <h1 class="page-title">Sobre este espaço</h1>
+        <p class="kicker">04 / Sobre</p>
+        <h1 class="page-title">Pedro Grangeiro</h1>
       </div>
       <p class="page-description">
-        Um registro público de trabalho, decisões técnicas e ideias em evolução.
+        AI Engineer e desenvolvedor back-end interessado em construir sistemas que tornem dados complexos úteis, verificáveis e fáceis de operar.
       </p>
     </header>
 
+    <div class="profile-strip" aria-label="Resumo profissional">
+      <span>{siteConfig.role}</span>
+      <span>{siteConfig.location}</span>
+      <span>Python · ML · LLMs · MLOps</span>
+    </div>
+
     <div class="about-grid">
-      <section>
-        <p class="kicker">Trabalho</p>
-        <p>Atuo principalmente com inteligência artificial, coleta de dados e desenvolvimento de sistemas de back-end.</p>
+      <section class="about-section about-section--lead">
+        <p class="kicker">Perfil</p>
+        <p>
+          Minha base é o desenvolvimento em Python. Atuo na interseção entre inteligência artificial,
+          engenharia de back-end e dados: modelos de linguagem, automação, web scraping, PostgreSQL
+          e pipelines de processamento fazem parte do tipo de problema que gosto de resolver.
+        </p>
+        <p>
+          Tenho experiência também com C# e .NET, além de HTML, CSS, JavaScript, Angular e React.
+          Git, Linux e ambientes Python completam o conjunto de ferramentas que uso para levar uma
+          ideia do experimento até uma solução reproduzível.
+        </p>
       </section>
-      <section>
-        <p class="kicker">Documentação</p>
-        <p>Os projetos mostram resultados; o blog desenvolve ideias; o jardim digital registra o processo.</p>
+
+      <section class="about-section">
+        <p class="kicker">Como trabalho</p>
+        <p>
+          Gosto de decompor problemas grandes em etapas observáveis. Isso aparece tanto em um scraper
+          que precisa sobreviver a mudanças de página quanto em um pipeline de IA que precisa explicar
+          de onde veio cada resultado.
+        </p>
+      </section>
+
+      <section class="about-section">
+        <p class="kicker">Formação</p>
+        <p>
+          Sou estudante de Bacharelado em Ciência da Computação na UERJ e de Análise e Desenvolvimento
+          de Sistemas na UNIFRAN. As duas formações seguem ativas e combinam fundamentos de computação
+          com desenvolvimento aplicado.
+        </p>
+      </section>
+
+      <section class="about-section">
+        <p class="kicker">Este espaço</p>
+        <p>
+          Os projetos registram o que construí. O blog documenta decisões técnicas com mais profundidade.
+          Os pensamentos funcionam como um jardim digital para ideias que ainda estão amadurecendo.
+        </p>
+      </section>
+
+      <section class="about-section about-section--links">
+        <p class="kicker">Perfis profissionais</p>
+        <div class="profile-links">
+          <a href={siteConfig.links.github} rel="me">GitHub <span aria-hidden="true">↗</span></a>
+          <a href={siteConfig.links.linkedin} rel="me">LinkedIn <span aria-hidden="true">↗</span></a>
+        </div>
       </section>
     </div>
   </div>
 </BaseLayout>
 
 <style>
+  .profile-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1.5rem;
+    margin-bottom: 4rem;
+    padding: 0.9rem 0;
+    border-top: 0.2rem solid var(--accent);
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font: 700 0.68rem/1.5 var(--mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
   .about-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     border-top: 1px solid var(--line);
   }
 
-  section {
-    padding: 2rem 2rem 2rem 0;
+  .about-section {
+    padding: 2.25rem;
+    border-right: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
   }
 
-  section + section {
-    padding-right: 0;
-    padding-left: 2rem;
-    border-left: 1px solid var(--line);
+  .about-section:nth-child(even) {
+    border-right: 0;
   }
 
-  section p:last-child {
-    max-width: 33rem;
-    margin: 0;
+  .about-section--lead {
+    grid-column: 1 / -1;
+    border-right: 0;
+  }
+
+  .about-section--lead p:not(.kicker) {
+    max-width: 63rem;
+    font-size: clamp(1.2rem, 2.3vw, 1.55rem);
+  }
+
+  .about-section p:not(.kicker) {
+    max-width: 36rem;
+    margin: 0 0 1rem;
     color: var(--ink-soft);
-    font-size: 1.2rem;
-    line-height: 1.7;
+    font-size: 1.08rem;
+    line-height: 1.72;
+  }
+
+  .about-section p:last-child {
+    margin-bottom: 0;
+  }
+
+  .about-section--links {
+    grid-column: 1 / -1;
+    border-right: 0;
+  }
+
+  .profile-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+  }
+
+  .profile-links a {
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--ink);
+    color: var(--ink);
+    font: 700 0.9rem/1.5 var(--ui);
+    text-decoration: none;
+  }
+
+  .profile-links span {
+    color: var(--accent);
   }
 
   @media (max-width: 42rem) {
@@ -58,9 +154,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       grid-template-columns: 1fr;
     }
 
-    section + section {
-      padding-left: 0;
-      border-left: 0;
+    .about-section,
+    .about-section:nth-child(even) {
+      grid-column: auto;
+      padding: 1.75rem 0;
+      border-right: 0;
     }
   }
 </style>

@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { siteConfig } from '../config/site';
+---
+
+<BaseLayout title="Contato" description="Canais profissionais para falar com Pedro Grangeiro.">
+  <div class="page-shell">
+    <header class="page-intro">
+      <div class="page-intro__copy">
+        <p class="kicker">05 / Contato</p>
+        <h1 class="page-title">Vamos conversar</h1>
+      </div>
+      <p class="page-description">
+        Para oportunidades, colaboração ou conversas sobre IA, dados e desenvolvimento, escolha o canal que fizer mais sentido.
+      </p>
+    </header>
+
+    <div class="contact-grid">
+      <a class="contact-card" href={siteConfig.links.linkedin} rel="me">
+        <span>01 / Profissional</span>
+        <strong>LinkedIn</strong>
+        <p>Experiência, formação e contato direto.</p>
+        <i aria-hidden="true">↗</i>
+      </a>
+
+      <a class="contact-card" href={siteConfig.links.github} rel="me">
+        <span>02 / Código</span>
+        <strong>GitHub</strong>
+        <p>Repositórios públicos e histórico técnico.</p>
+        <i aria-hidden="true">↗</i>
+      </a>
+    </div>
+
+    <p class="privacy-note">
+      Telefone e e-mail pessoal não são publicados neste site. O LinkedIn é o canal inicial de contato.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--line);
+  }
+
+  .contact-card {
+    position: relative;
+    min-height: 17rem;
+    padding: 2rem;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .contact-card:last-child {
+    border-right: 0;
+  }
+
+  .contact-card:hover {
+    background: var(--paper-raised);
+  }
+
+  .contact-card > span {
+    color: var(--muted);
+    font: 700 0.68rem/1.5 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .contact-card strong {
+    display: block;
+    margin-top: 2rem;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+  }
+
+  .contact-card p {
+    max-width: 25rem;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .contact-card i {
+    position: absolute;
+    right: 2rem;
+    bottom: 2rem;
+    color: var(--accent);
+    font-size: 1.5rem;
+    font-style: normal;
+  }
+
+  .privacy-note {
+    max-width: 52rem;
+    margin: 2rem 0 0;
+    color: var(--muted);
+    font: 600 0.76rem/1.6 var(--mono);
+  }
+
+  @media (max-width: 38rem) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .contact-card {
+      min-height: 14rem;
+      padding: 1.5rem 0;
+      border-right: 0;
+    }
+
+    .contact-card i {
+      right: 0;
+      bottom: 1.5rem;
+    }
+  }
+</style>

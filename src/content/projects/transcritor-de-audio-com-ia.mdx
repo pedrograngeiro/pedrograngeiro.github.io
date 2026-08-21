@@ -1,0 +1,36 @@
+---
+title: 'Transcritor de áudio e gerador de legendas com IA'
+description: 'Ferramenta em Python que extrai áudio de vídeos, executa transcrição com Whisper e gera texto e legendas SRT.'
+publishedAt: 2024-11-04
+tags:
+  - inteligencia-artificial
+  - audio
+  - automacao
+draft: false
+featured: true
+role: 'Desenvolvimento da automação local'
+stack:
+  - Python
+  - Whisper
+  - PyTorch
+  - FFmpeg
+outcome: 'Conversão de MP4 para áudio, transcrição local e geração automática de legendas SRT.'
+repository: 'https://github.com/pedrograngeiro/Audio-Transcription-And-Subtitle-Generator'
+---
+
+# Transcritor de áudio e gerador de legendas
+
+## Problema
+
+Extrair o conteúdo de vídeos normalmente exige várias ferramentas e etapas manuais: separar o áudio, transcrever a fala, revisar o texto e montar um arquivo de legendas sincronizado.
+
+## Implementação
+
+O projeto organiza esse fluxo em dois módulos. O primeiro utiliza FFmpeg para extrair o áudio de arquivos MP4 e armazená-lo em MP3. O segundo aplica o modelo Whisper ao áudio e grava tanto a transcrição em texto quanto as legendas no formato SRT.
+
+O processamento acontece localmente e permite definir diretórios separados para áudio, textos e legendas. PyTorch oferece a base de execução do modelo, enquanto funções Python mantêm cada etapa reutilizável fora do script principal.
+
+## Aprendizado
+
+Além da integração entre ferramentas, o projeto mostrou a importância de tratar formatos, dependências nativas e organização de arquivos como parte da experiência do usuário — não apenas como detalhes da inferência.
+

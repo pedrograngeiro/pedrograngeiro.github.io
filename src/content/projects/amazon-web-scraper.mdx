@@ -1,0 +1,36 @@
+---
+title: 'Coleta e comparação de preços com web scraping'
+description: 'Scraper educacional em Python que percorre resultados de busca, extrai preços e organiza os dados coletados em CSV.'
+publishedAt: 2023-09-08
+tags:
+  - web-scraping
+  - dados
+  - automacao
+draft: false
+featured: false
+role: 'Desenvolvimento do coletor e da exportação'
+stack:
+  - Python
+  - BeautifulSoup
+  - Requests
+  - CSV
+outcome: 'Coleta multipágina estruturada em módulos e exportação dos resultados para análise.'
+repository: 'https://github.com/pedrograngeiro/Amazon-Web-Scraper'
+---
+
+# Coleta e comparação de preços
+
+## Problema
+
+Comparar muitos resultados de busca manualmente é repetitivo e dificulta análises históricas. O projeto explora como transformar páginas de produtos em uma tabela simples que possa ser filtrada e estudada.
+
+## Implementação
+
+O scraper usa Requests para buscar as páginas e BeautifulSoup para interpretar o HTML. A navegação multipágina, a extração dos campos e a geração do CSV foram separadas em módulos próprios, reduzindo o acoplamento do script principal.
+
+O resultado é um arquivo tabular com os dados coletados, adequado para comparação ou processamento posterior.
+
+## Limitações
+
+Este é um projeto educacional. Seletores HTML podem mudar, preços podem depender de região ou sessão, e qualquer coleta real precisa respeitar limites de acesso e os termos do site de origem. Esses fatores tornam observabilidade, tratamento de erros e manutenção tão importantes quanto a primeira extração bem-sucedida.
+

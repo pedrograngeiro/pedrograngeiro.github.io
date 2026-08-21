@@ -1,0 +1,44 @@
+---
+title: 'Reconhecimento e reconstrução de fluxogramas'
+description: 'Pipeline híbrido que combina visão computacional, OCR e análise geométrica para transformar diagramas rasterizados em grafos estruturados.'
+publishedAt: 2026-08-20
+updatedAt: 2026-08-20
+tags:
+  - visao-computacional
+  - inteligencia-artificial
+  - processamento-de-imagens
+draft: false
+featured: true
+role: 'Arquitetura e desenvolvimento do pipeline'
+stack:
+  - Python
+  - YOLO
+  - OpenCV
+  - Tesseract
+  - Graphviz
+outcome: 'Pipeline auditável com JSON intermediário, saída DOT e 10 testes automatizados.'
+---
+
+# Reconhecimento e reconstrução de fluxogramas
+
+## Problema
+
+Um fluxograma dentro de uma imagem ou PDF parece estruturado para uma pessoa, mas para o computador é apenas uma grade de pixels. Formas, textos e setas precisam ser recuperados antes que o conteúdo possa ser pesquisado, corrigido ou reutilizado.
+
+## Solução
+
+O projeto separa o reconhecimento em quatro responsabilidades:
+
+1. YOLO localiza formas e pontas de seta.
+2. Tesseract lê o texto dentro das regiões detectadas.
+3. OpenCV encontra segmentos e evidências geométricas das conexões.
+4. Um construtor topológico transforma essas evidências em nós e arestas.
+
+O resultado é registrado primeiro em JSON. Depois, um renderizador gera DOT e utiliza Graphviz para produzir uma nova visualização. Essa camada intermediária mantém o processo auditável e permite criar outros exportadores no futuro.
+
+## Estado atual
+
+A arquitetura, o esquema do grafo e as principais regras geométricas possuem testes automatizados. A qualidade ponta a ponta ainda depende de um dataset representativo e de pesos YOLO treinados e versionados.
+
+[Leia o artigo técnico completo](/blog/da-imagem-ao-grafo-editavel/) para conhecer as decisões, comandos, benchmark parcial e limitações do projeto.
+
