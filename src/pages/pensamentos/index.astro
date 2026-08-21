@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentCard from '../../components/ContentCard.astro';
+import { byNewest, isVisible } from '../../lib/content';
+
+const notes = (await getCollection('notes', isVisible)).sort(byNewest);
+---
+
+<BaseLayout title="Pensamentos" description="Notas curtas e ideias em diferentes estágios de maturidade.">
+  <div class="page-shell">
+    <header class="page-intro">
+      <div class="page-intro__copy">
+        <p class="kicker">03 / Jardim digital</p>
+        <h1 class="page-title">Pensamentos</h1>
+      </div>
+      <p class="page-description">
+        Ideias que podem começar pequenas, receber conexões e amadurecer com o tempo.
+      </p>
+    </header>
+
+    <section class="content-grid" aria-label="Lista de pensamentos">
+      {notes.map((note) => (
+        <ContentCard
+          href={`/pensamentos/${note.id}/`}
+          kind="Pensamento"
+          title={note.data.title}
+          description={note.data.description}
+          publishedAt={note.data.publishedAt}
+          tags={note.data.tags}
+          status={note.data.status}
+        />
+      ))}
+    </section>
+  </div>
+</BaseLayout>

@@ -1,0 +1,89 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import ContentLayout from '../../layouts/ContentLayout.astro';
+import { isVisible } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects', isVisible);
+
+  return projects.map((entry) => ({
+    params: { id: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'projects'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<ContentLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  publishedAt={entry.data.publishedAt}
+  updatedAt={entry.data.updatedAt}
+  tags={entry.data.tags}
+  kind="Projeto"
+  backHref="/projetos/"
+  backLabel="Projetos"
+>
+  {(entry.data.role || entry.data.stack.length > 0 || entry.data.outcome) && (
+    <dl slot="details" class="project-facts">
+      {entry.data.role && <div><dt>Papel</dt><dd>{entry.data.role}</dd></div>}
+      {entry.data.stack.length > 0 && <div><dt>Stack</dt><dd>{entry.data.stack.join(' · ')}</dd></div>}
+      {entry.data.outcome && <div><dt>Resultado</dt><dd>{entry.data.outcome}</dd></div>}
+    </dl>
+  )}
+
+  <Content />
+</ContentLayout>
+
+<style>
+  .project-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0 0 3rem;
+    border: 1px solid var(--line);
+  }
+
+  .project-facts div {
+    padding: 1rem;
+    border-right: 1px solid var(--line);
+  }
+
+  .project-facts div:last-child {
+    border-right: 0;
+  }
+
+  dt {
+    margin-bottom: 0.5rem;
+    color: var(--muted);
+    font: 700 0.65rem/1.4 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    font: 600 0.85rem/1.5 var(--ui);
+  }
+
+  @media (max-width: 38rem) {
+    .project-facts {
+      grid-template-columns: 1fr;
+    }
+
+    .project-facts div {
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .project-facts div:last-child {
+      border-bottom: 0;
+    }
+  }
+</style>

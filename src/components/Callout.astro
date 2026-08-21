@@ -1,0 +1,54 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = 'Nota' } = Astro.props;
+---
+
+<aside>
+  <strong>{title}</strong>
+  <div class="content">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  aside {
+    position: relative;
+    margin: 2.5rem 0;
+    padding: 1.3rem 1.4rem 1.3rem 3.25rem;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    box-shadow: 0.4rem 0.4rem 0 var(--accent-soft);
+  }
+
+  aside::before {
+    content: '!';
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    display: grid;
+    width: 1.15rem;
+    height: 1.15rem;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--paper-raised);
+    background: var(--accent);
+    font: 800 0.72rem/1 var(--mono);
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .content :global(p) {
+    margin: 0;
+  }
+</style>

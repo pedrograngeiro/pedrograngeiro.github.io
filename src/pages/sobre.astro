@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Sobre" description="Sobre o trabalho e a proposta deste portfólio.">
+  <div class="page-shell">
+    <header class="page-intro">
+      <div class="page-intro__copy">
+        <p class="kicker">04 / Contexto</p>
+        <h1 class="page-title">Sobre este espaço</h1>
+      </div>
+      <p class="page-description">
+        Um registro público de trabalho, decisões técnicas e ideias em evolução.
+      </p>
+    </header>
+
+    <div class="about-grid">
+      <section>
+        <p class="kicker">Trabalho</p>
+        <p>Atuo principalmente com inteligência artificial, coleta de dados e desenvolvimento de sistemas de back-end.</p>
+      </section>
+      <section>
+        <p class="kicker">Documentação</p>
+        <p>Os projetos mostram resultados; o blog desenvolve ideias; o jardim digital registra o processo.</p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--line);
+  }
+
+  section {
+    padding: 2rem 2rem 2rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  section + section {
+    padding-right: 0;
+    padding-left: 2rem;
+    border-left: 1px solid var(--line);
+  }
+
+  section p:last-child {
+    max-width: 33rem;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1.2rem;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 42rem) {
+    .about-grid {
+      grid-template-columns: 1fr;
+    }
+
+    section + section {
+      padding-left: 0;
+      border-left: 0;
+    }
+  }
+</style>

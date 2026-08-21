@@ -1,0 +1,244 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { formatDate, statusLabels } from '../lib/content';
+
+interface Props {
+  title: string;
+  description: string;
+  publishedAt: Date;
+  updatedAt?: Date;
+  tags?: string[];
+  kind: 'Projeto' | 'Artigo' | 'Pensamento';
+  status?: keyof typeof statusLabels;
+  backHref: string;
+  backLabel: string;
+}
+
+const {
+  title,
+  description,
+  publishedAt,
+  updatedAt,
+  tags = [],
+  kind,
+  status,
+  backHref,
+  backLabel,
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <article class="entry-shell">
+    <a class="back" href={backHref}>← {backLabel}</a>
+
+    <div class="entry-meta">
+      <span class="kind">{kind}</span>
+      {status && <span class="status"><i></i>{statusLabels[status]}</span>}
+      <time datetime={publishedAt.toISOString()}>{formatDate(publishedAt)}</time>
+    </div>
+
+    <header class="entry-header">
+      <p>{description}</p>
+    </header>
+
+    <slot name="details" />
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    <footer class="entry-footer">
+      {updatedAt && <p>Atualizado em {formatDate(updatedAt)}</p>}
+      {tags.length > 0 && (
+        <ul aria-label="Tags">
+          {tags.map((tag) => <li><a href={`/tags/${tag}/`}>#{tag}</a></li>)}
+        </ul>
+      )}
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .entry-shell {
+    width: min(46rem, 100%);
+    margin: 0 auto;
+    padding: 3rem 0 7rem;
+  }
+
+  .back {
+    color: var(--muted);
+    font: 700 0.72rem/1.4 var(--mono);
+    letter-spacing: 0.06em;
+    text-underline-offset: 0.25em;
+    text-transform: uppercase;
+  }
+
+  .entry-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    margin-top: 4.5rem;
+    padding: 0.75rem 0;
+    border-top: 0.2rem solid var(--accent);
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font: 700 0.67rem/1.4 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .kind {
+    margin-right: auto;
+    color: var(--ink);
+  }
+
+  .status i {
+    display: inline-block;
+    width: 0.45rem;
+    height: 0.45rem;
+    margin-right: 0.45rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .entry-header p {
+    max-width: 44rem;
+    margin: 2.5rem 0 3rem;
+    color: var(--ink-soft);
+    font-size: clamp(1.2rem, 2.8vw, 1.55rem);
+    line-height: 1.55;
+  }
+
+  :global(.prose h1) {
+    max-width: 13ch;
+    margin: 3rem 0 2rem;
+    font-size: clamp(3.1rem, 9vw, 5.8rem);
+    font-weight: 500;
+    letter-spacing: -0.06em;
+    line-height: 0.95;
+  }
+
+  :global(.prose h2) {
+    margin: 3rem 0 1rem;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+
+  :global(.prose p),
+  :global(.prose li) {
+    max-width: 66ch;
+    color: var(--ink-soft);
+    font-size: 1.15rem;
+    line-height: 1.75;
+  }
+
+  :global(.prose a) {
+    color: var(--accent-strong);
+    text-underline-offset: 0.2em;
+  }
+
+  :global(.prose code) {
+    padding: 0.12em 0.3em;
+    border-radius: 0.25rem;
+    color: var(--code-ink);
+    background: var(--code);
+    font-family: var(--mono);
+    font-size: 0.9em;
+  }
+
+  :global(.prose pre) {
+    overflow-x: auto;
+    padding: 1.25rem;
+    border-radius: 0.25rem;
+    color: var(--code-ink);
+    background: var(--code);
+  }
+
+  :global(.prose pre code) {
+    padding: 0;
+  }
+
+  :global(.prose figure) {
+    margin: 2.75rem 0;
+  }
+
+  :global(.prose figure img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: 0.35rem;
+    box-shadow: 0.45rem 0.45rem 0 var(--line);
+  }
+
+  :global(.prose figcaption) {
+    margin-top: 0.85rem;
+    color: var(--muted);
+    font: 600 0.72rem/1.5 var(--mono);
+  }
+
+  :global(.prose blockquote) {
+    margin: 2rem 0;
+    padding: 0.25rem 0 0.25rem 1.5rem;
+    border-left: 0.25rem solid var(--accent);
+  }
+
+  :global(.prose blockquote p) {
+    margin: 0;
+    color: var(--ink);
+    font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+  }
+
+  :global(.prose table) {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    margin: 2rem 0;
+    border-collapse: collapse;
+    font: 600 0.78rem/1.5 var(--mono);
+  }
+
+  :global(.prose th),
+  :global(.prose td) {
+    padding: 0.75rem 0.8rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  :global(.prose th) {
+    color: var(--ink);
+    background: var(--paper-raised);
+  }
+
+  @media (min-width: 64rem) {
+    :global(.prose .wide-figure) {
+      width: min(60rem, calc(100vw - 3rem));
+      margin-left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  .entry-footer {
+    margin-top: 4rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font: 600 0.72rem/1.5 var(--mono);
+  }
+
+  .entry-footer ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .entry-footer a {
+    color: var(--accent-strong);
+    text-underline-offset: 0.2em;
+  }
+</style>

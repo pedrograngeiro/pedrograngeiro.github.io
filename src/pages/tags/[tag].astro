@@ -1,0 +1,41 @@
+---
+import type { ContentIndexItem } from '../../lib/content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentCard from '../../components/ContentCard.astro';
+import { getContentIndex } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const items = await getContentIndex();
+  const tags = [...new Set(items.flatMap((item) => item.tags))];
+
+  return tags.map((tag) => ({
+    params: { tag },
+    props: { tag, items: items.filter((item) => item.tags.includes(tag)) },
+  }));
+}
+
+interface Props {
+  tag: string;
+  items: ContentIndexItem[];
+}
+
+const { tag, items } = Astro.props;
+---
+
+<BaseLayout title={`#${tag}`} description={`Conteúdos relacionados a ${tag}.`}>
+  <div class="page-shell">
+    <header class="page-intro">
+      <div class="page-intro__copy">
+        <p class="kicker">Tag</p>
+        <h1 class="page-title">#{tag}</h1>
+      </div>
+      <p class="page-description">{items.length} {items.length === 1 ? 'publicação relacionada' : 'publicações relacionadas'}.</p>
+    </header>
+
+    <section class="content-grid" aria-label={`Conteúdos com a tag ${tag}`}>
+      {items.map((item) => (
+        <ContentCard {...item} />
+      ))}
+    </section>
+  </div>
+</BaseLayout>

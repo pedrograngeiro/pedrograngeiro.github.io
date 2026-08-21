@@ -1,0 +1,103 @@
+---
+import { formatDate, statusLabels } from '../lib/content';
+
+interface Props {
+  href: string;
+  kind: 'Projeto' | 'Artigo' | 'Pensamento';
+  title: string;
+  description: string;
+  publishedAt: Date;
+  tags?: string[];
+  status?: keyof typeof statusLabels;
+}
+
+const { href, kind, title, description, publishedAt, tags = [], status } = Astro.props;
+---
+
+<article class="content-card">
+  <div class="meta">
+    <span>{kind}</span>
+    <time datetime={publishedAt.toISOString()}>{formatDate(publishedAt)}</time>
+  </div>
+  <h2><a href={href}>{title}</a></h2>
+  <p>{description}</p>
+  <div class="footer">
+    {status ? <span class="status"><i></i>{statusLabels[status]}</span> : <span>{tags.slice(0, 2).join(' · ')}</span>}
+    <span aria-hidden="true">↗</span>
+  </div>
+</article>
+
+<style>
+  .content-card {
+    position: relative;
+    display: grid;
+    min-height: 18rem;
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--paper-raised) 92%, transparent);
+    transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  .content-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0.35rem 0.35rem 0 var(--accent-soft);
+    transform: translate(-0.15rem, -0.15rem);
+  }
+
+  .meta,
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--muted);
+    font: 700 0.66rem/1.4 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 2.5rem 0 0.75rem;
+    font-size: clamp(1.7rem, 4vw, 2.35rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  h2 a {
+    text-decoration: none;
+  }
+
+  h2 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  p {
+    align-self: start;
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .footer {
+    align-self: end;
+    margin-top: 2rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .footer > span:last-child {
+    color: var(--accent);
+  }
+
+  .status i {
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    margin-right: 0.4rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+</style>

@@ -1,0 +1,39 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentCard from '../../components/ContentCard.astro';
+import { byNewest, isVisible } from '../../lib/content';
+
+const projects = (await getCollection('projects', isVisible)).sort(byNewest);
+---
+
+<BaseLayout title="Projetos" description="Estudos de caso sobre IA, coleta de dados e sistemas de back-end.">
+  <div class="page-shell">
+    <header class="page-intro">
+      <div class="page-intro__copy">
+        <p class="kicker">01 / Trabalho</p>
+        <h1 class="page-title">Projetos</h1>
+      </div>
+      <p class="page-description">
+        Estudos de caso com contexto, decisões técnicas, arquitetura e resultados.
+      </p>
+    </header>
+
+    <section class="content-grid" aria-label="Lista de projetos">
+      {projects.length > 0 ? projects.map((project) => (
+        <ContentCard
+          href={`/projetos/${project.id}/`}
+          kind="Projeto"
+          title={project.data.title}
+          description={project.data.description}
+          publishedAt={project.data.publishedAt}
+          tags={project.data.stack}
+        />
+      )) : (
+        <div class="empty-state">
+          <p>Os primeiros estudos de caso estão sendo preparados. A estrutura já está pronta para recebê-los.</p>
+        </div>
+      )}
+    </section>
+  </div>
+</BaseLayout>
