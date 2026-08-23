@@ -1,6 +1,6 @@
 ---
 title: 'Coleta e comparação de preços com web scraping'
-description: 'Scraper educacional em Python que percorre resultados de busca, extrai preços e organiza os dados coletados em CSV.'
+description: 'CLI educacional em Python que coleta resultados de busca com limites explícitos, extração defensiva e exportação em CSV.'
 publishedAt: 2023-09-08
 tags:
   - web-scraping
@@ -14,8 +14,8 @@ stack:
   - BeautifulSoup
   - Requests
   - CSV
-outcome: 'Coleta multipágina estruturada em módulos e exportação dos resultados para análise.'
-repository: 'https://github.com/pedrograngeiro/Amazon-Web-Scraper'
+outcome: 'Coleta configurável de até dez páginas, exportação compatível com Excel e quatro testes offline.'
+repository: 'https://github.com/pedrograngeiro/amazon-price-scraper'
 ---
 
 # Coleta e comparação de preços
@@ -26,11 +26,13 @@ Comparar muitos resultados de busca manualmente é repetitivo e dificulta análi
 
 ## Implementação
 
-O scraper usa Requests para buscar as páginas e BeautifulSoup para interpretar o HTML. A navegação multipágina, a extração dos campos e a geração do CSV foram separadas em módulos próprios, reduzindo o acoplamento do script principal.
+O scraper usa Requests para buscar as páginas e BeautifulSoup para interpretar o HTML. A CLI recebe o termo, o limite de páginas, o intervalo e o arquivo de destino. Timeout, validação dos limites e erros HTTP tornam a execução previsível.
 
-O resultado é um arquivo tabular com os dados coletados, adequado para comparação ou processamento posterior.
+Cada resultado é interpretado dentro de seu próprio cartão, evitando que títulos e preços de produtos diferentes sejam combinados. O resultado é um CSV com título, preço, URL e data da coleta, adequado para comparação ou processamento posterior.
+
+Quatro testes usam HTML local para validar URLs, extração e exportação sem gerar tráfego no site de origem.
 
 ## Limitações
 
-Este é um projeto educacional. Seletores HTML podem mudar, preços podem depender de região ou sessão, e qualquer coleta real precisa respeitar limites de acesso e os termos do site de origem. Esses fatores tornam observabilidade, tratamento de erros e manutenção tão importantes quanto a primeira extração bem-sucedida.
+Este é um projeto educacional. Seletores HTML podem mudar, preços podem depender de região ou sessão, e qualquer coleta real precisa respeitar limites de acesso e os termos do site de origem. O projeto não tenta contornar CAPTCHA ou mecanismos antibot; para produção, uma API oficial é a opção adequada.
 
