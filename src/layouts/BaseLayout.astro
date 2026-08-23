@@ -2,7 +2,8 @@
 import '../styles/global.css';
 import { getImage, Image } from 'astro:assets';
 import { siteConfig } from '../config/site';
-import favicon from '../assets/brand/favicon-cropped.png';
+import favicon from '../assets/brand/g-dev-favicon.png';
+import brandMark from '../assets/brand/g-dev-logo.png';
 
 interface Props {
   title?: string;
@@ -56,7 +57,7 @@ const isActive = (href: string) =>
     <div class="site-frame">
       <header class="site-header">
         <a class="wordmark" href="/" aria-label="Página inicial">
-          <Image src={favicon} alt="" width={30} height={30} format="webp" quality={80} />
+          <Image src={brandMark} alt="" width={38} height={38} format="webp" quality={82} />
           <span>{siteConfig.shortTitle}</span>
         </a>
         <nav aria-label="Navegação principal">
@@ -73,7 +74,10 @@ const isActive = (href: string) =>
       </main>
 
       <footer class="site-footer">
-        <span>{siteConfig.name} · Rio de Janeiro</span>
+        <a class="footer-brand" href="/" aria-label="G dev — página inicial">
+          <Image src={brandMark} alt="" width={56} height={56} format="webp" quality={84} />
+          <span>{siteConfig.name} · Rio de Janeiro</span>
+        </a>
         <span class="footer-links">
           <a href={siteConfig.links.github} rel="me">GitHub</a>
           <a href={siteConfig.links.linkedin} rel="me">LinkedIn</a>
@@ -133,9 +137,10 @@ const isActive = (href: string) =>
   }
 
   .wordmark :global(img) {
-    width: 1.85rem;
-    height: 1.85rem;
+    width: 2.2rem;
+    height: 2.2rem;
     border-radius: 0.45rem;
+    object-fit: cover;
   }
 
   nav {
@@ -172,6 +177,26 @@ const isActive = (href: string) =>
     border-top: 1px solid var(--line);
     border-bottom: 0;
     color: var(--muted);
+  }
+
+  .footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .footer-brand :global(img) {
+    width: 3.5rem;
+    height: 3.5rem;
+    flex: none;
+    border-radius: 0.75rem;
+    object-fit: cover;
+  }
+
+  .footer-brand:hover span {
+    color: var(--ink);
   }
 
   .footer-links {
@@ -212,6 +237,14 @@ const isActive = (href: string) =>
 
     .footer-links > span {
       display: none;
+    }
+
+    .site-footer {
+      align-items: flex-start;
+    }
+
+    .footer-brand > span {
+      max-width: 12rem;
     }
   }
 </style>

@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: 'Pedro Grangeiro',
   title: 'Pedro Grangeiro — Portfólio & Jardim Digital',
-  shortTitle: 'PG',
+  shortTitle: 'Pedro Grangeiro',
   description: 'Portfólio de Pedro Grangeiro: inteligência artificial, Python, dados, scraping e engenharia de back-end.',
   language: 'pt-BR',
   role: 'AI Engineer & Backend Developer',
