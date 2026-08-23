@@ -116,6 +116,7 @@ const {
     font-weight: 500;
     letter-spacing: -0.06em;
     line-height: 0.95;
+    overflow-wrap: anywhere;
   }
 
   :global(.prose h2) {
@@ -123,6 +124,7 @@ const {
     font-size: clamp(1.5rem, 4vw, 2rem);
     font-weight: 500;
     letter-spacing: -0.025em;
+    overflow-wrap: anywhere;
   }
 
   :global(.prose p),
@@ -240,5 +242,37 @@ const {
   .entry-footer a {
     color: var(--accent-strong);
     text-underline-offset: 0.2em;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 34rem) {
+    .entry-shell {
+      padding: 2rem 0 4.5rem;
+    }
+
+    .entry-meta {
+      margin-top: 3rem;
+    }
+
+    :global(.prose h1) {
+      font-size: clamp(2.5rem, 13vw, 4rem);
+    }
+
+    :global(.prose p),
+    :global(.prose li) {
+      font-size: 1.05rem;
+    }
+
+    :global(.prose figure) {
+      margin: 2rem 0;
+    }
+
+    :global(.prose figure img) {
+      box-shadow: 0.3rem 0.3rem 0 var(--line);
+    }
+
+    :global(.prose blockquote) {
+      padding-left: 1rem;
+    }
   }
 </style>

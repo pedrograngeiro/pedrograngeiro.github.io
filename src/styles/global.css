@@ -23,7 +23,6 @@
 }
 
 html {
-  min-width: 20rem;
   scroll-behavior: smooth;
 }
 
@@ -86,6 +85,7 @@ a:focus-visible {
   font-weight: 500;
   letter-spacing: -0.065em;
   line-height: 0.9;
+  overflow-wrap: anywhere;
 }
 
 .page-description {
@@ -117,13 +117,28 @@ a:focus-visible {
 }
 
 @media (max-width: 46rem) {
+  .page-shell {
+    padding: clamp(3rem, 10vw, 4.5rem) 0 4.5rem;
+  }
+
   .page-intro,
   .content-grid {
     grid-template-columns: 1fr;
   }
 
+  .page-intro {
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
   .page-description {
     max-width: 38rem;
+  }
+}
+
+@media (max-width: 32rem) {
+  .page-title {
+    font-size: clamp(2.8rem, 15vw, 4.5rem);
   }
 }
 

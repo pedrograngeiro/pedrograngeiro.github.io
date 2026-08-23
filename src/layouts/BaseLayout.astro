@@ -37,7 +37,7 @@ const isActive = (href: string) =>
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#f4f1e8" />
     <meta property="og:type" content="website" />
@@ -223,6 +223,12 @@ const isActive = (href: string) =>
     nav {
       max-width: 20rem;
     }
+
+    nav a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.5rem;
+    }
   }
 
   @media (max-width: 32rem) {
@@ -232,7 +238,33 @@ const isActive = (href: string) =>
     }
 
     nav {
+      display: flex;
+      flex-wrap: nowrap;
+      width: 100%;
+      max-width: none;
       justify-content: flex-start;
+      gap: 0.25rem;
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+      scroll-snap-type: inline proximity;
+      scrollbar-width: thin;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    nav a {
+      flex: 0 0 auto;
+      min-height: 2.75rem;
+      padding: 0.55rem 0.75rem;
+      scroll-snap-align: start;
+      white-space: nowrap;
+    }
+
+    nav a[aria-current='page']::before {
+      position: static;
+      flex: none;
+      margin-right: 0.5rem;
+      transform: none;
     }
 
     .footer-links > span {
@@ -241,6 +273,12 @@ const isActive = (href: string) =>
 
     .site-footer {
       align-items: flex-start;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .footer-links {
+      justify-content: flex-start;
     }
 
     .footer-brand > span {
