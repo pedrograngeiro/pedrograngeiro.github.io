@@ -1,36 +1,71 @@
 ---
-title: 'Transcritor de áudio e gerador de legendas com IA'
-description: 'Ferramenta em Python que extrai áudio de vídeos, executa transcrição com Whisper e gera texto e legendas SRT.'
+title: 'Transcritor de áudio e legendas com Whisper'
+description: 'Pipeline local que converte vídeos em áudio, transcrição TXT e legenda SRT usando FFmpeg e Whisper.'
 publishedAt: 2024-11-04
+updatedAt: 2026-08-23
 tags:
   - inteligencia-artificial
   - audio
   - automacao
 draft: false
 featured: true
-role: 'Desenvolvimento da automação local'
+role: 'Implementação, testes e documentação'
 stack:
   - Python
-  - Whisper
-  - PyTorch
+  - OpenAI Whisper
   - FFmpeg
-outcome: 'Conversão de MP4 para áudio, transcrição local e geração automática de legendas SRT.'
-repository: 'https://github.com/pedrograngeiro/Audio-Transcription-And-Subtitle-Generator'
+  - unittest
+outcome: 'Fluxo reproduzível de vídeo para MP3, TXT e SRT com uma CLI e quatro testes.'
+repository: 'https://github.com/pedrograngeiro/whisper-subtitle-generator'
 ---
 
-# Transcritor de áudio e gerador de legendas
+# Do vídeo à legenda local
 
 ## Problema
 
-Extrair o conteúdo de vídeos normalmente exige várias ferramentas e etapas manuais: separar o áudio, transcrever a fala, revisar o texto e montar um arquivo de legendas sincronizado.
+Produzir uma legenda reutilizável normalmente exige coordenar extração de áudio, reconhecimento de fala e escrita dos formatos de saída. O protótipo inicial extraía o áudio, mas não retornava o caminho do MP3 para a transcrição, executava automaticamente ao ser importado e dependia de pastas criadas manualmente.
 
-## Implementação
+## Solução
 
-O projeto organiza esse fluxo em dois módulos. O primeiro utiliza FFmpeg para extrair o áudio de arquivos MP4 e armazená-lo em MP3. O segundo aplica o modelo Whisper ao áudio e grava tanto a transcrição em texto quanto as legendas no formato SRT.
+```text
+vídeo
+  │
+  ▼
+FFmpeg ──► MP3
+             │
+             ▼
+          Whisper
+             │
+             ├──► legenda SRT
+             └──► transcrição TXT
+```
 
-O processamento acontece localmente e permite definir diretórios separados para áudio, textos e legendas. PyTorch oferece a base de execução do modelo, enquanto funções Python mantêm cada etapa reutilizável fora do script principal.
+A extração cria seu diretório, executa o FFmpeg com verificação de erro e devolve o caminho produzido. A CLI conecta esse resultado ao Whisper e permite escolher modelo e diretórios sem alterar o código.
 
-## Aprendizado
+## Confiabilidade
 
-Além da integração entre ferramentas, o projeto mostrou a importância de tratar formatos, dependências nativas e organização de arquivos como parte da experiência do usuário — não apenas como detalhes da inferência.
+- nenhuma execução acontece durante a importação dos módulos;
+- falhas do FFmpeg são propagadas para o terminal;
+- diretórios de áudio e texto são criados automaticamente;
+- arquivos de entrada e saída permanecem fora do Git;
+- testes usam substitutos para FFmpeg e Whisper, sem baixar modelos ou mídia.
+
+## Resultado
+
+Uma entrada `video.mp4` produz, na configuração padrão:
+
+```text
+audios/
+└── video.mp3
+
+srts/
+├── video.srt
+└── video.txt
+```
+
+Quatro testes verificam o caminho retornado pela extração, a propagação de erros, a escrita da transcrição e a integração entre argumentos, áudio e legenda.
+
+## Limitações
+
+O projeto processa um arquivo por execução e carrega o modelo novamente a cada chamada. O modo atual usa `fp16=False` para privilegiar compatibilidade com CPU, e a qualidade depende do idioma, do ruído e do modelo escolhido.
 
