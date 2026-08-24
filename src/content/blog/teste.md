@@ -2,7 +2,7 @@
 title: teste de postagem
 description: teste este é um post este
 publishedAt: 2026-08-24
-draft: true
+draft: false
 featured: false
 ---
 teste**The standard Lorem Ipsum passage, used since 1966**
