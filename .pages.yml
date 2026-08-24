@@ -1,0 +1,97 @@
+media:
+  input: public/images/articles
+  output: /images/articles
+  rename: true
+  categories:
+    - image
+  extensions:
+    - jpg
+    - jpeg
+    - png
+    - webp
+    - avif
+    - gif
+
+content:
+  - name: blog
+    label: Artigos
+    type: collection
+    path: src/content/blog
+    format: yaml-frontmatter
+    filename:
+      template: "{primary}.md"
+      field: create
+    exclude:
+      - modelo-artigo.mdx
+      - da-imagem-ao-grafo-editavel.mdx
+    view:
+      primary: title
+      fields:
+        - title
+        - publishedAt
+        - draft
+        - featured
+      sort:
+        - publishedAt
+        - title
+      search:
+        - title
+        - description
+        - tags
+      default:
+        sort: publishedAt
+        order: desc
+    fields:
+      - name: title
+        label: Título
+        type: string
+        required: true
+        options:
+          maxlength: 160
+
+      - name: description
+        label: Descrição
+        type: text
+        required: true
+        description: Resumo usado na listagem do blog e nos metadados da página.
+        options:
+          minlength: 20
+          maxlength: 280
+
+      - name: publishedAt
+        label: Data de publicação
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+
+      - name: updatedAt
+        label: Última atualização
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+
+      - name: tags
+        label: Tags
+        type: string
+        list: true
+
+      - name: draft
+        label: Rascunho
+        type: boolean
+        default: true
+        description: Enquanto estiver ativo, o artigo não aparece no site publicado.
+
+      - name: featured
+        label: Artigo em destaque
+        type: boolean
+        default: false
+
+      - name: body
+        label: Conteúdo
+        type: rich-text
+        required: true
+        options:
+          format: markdown
+          switcher: true
