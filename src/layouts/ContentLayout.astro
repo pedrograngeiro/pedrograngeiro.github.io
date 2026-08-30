@@ -43,7 +43,7 @@ const {
 
     <slot name="details" />
 
-    <div class="prose">
+    <div class:list={['prose', { 'prose--article': kind === 'Artigo' }]}>
       <slot />
     </div>
 
@@ -133,6 +133,16 @@ const {
     color: var(--ink-soft);
     font-size: 1.15rem;
     line-height: 1.75;
+  }
+
+  :global(.prose--article p),
+  :global(.prose--article li) {
+    hyphens: auto;
+    text-align: justify;
+  }
+
+  :global(.prose--article > p) {
+    text-indent: 1.5em;
   }
 
   :global(.prose a) {
@@ -261,6 +271,10 @@ const {
     :global(.prose p),
     :global(.prose li) {
       font-size: 1.05rem;
+    }
+
+    :global(.prose--article > p) {
+      text-indent: 1.25em;
     }
 
     :global(.prose figure) {

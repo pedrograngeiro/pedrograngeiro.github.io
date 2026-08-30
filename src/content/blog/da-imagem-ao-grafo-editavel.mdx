@@ -1,14 +1,13 @@
 ---
-title: 'Da imagem ao grafo editável: um pipeline híbrido para reconhecimento e reconstrução automática de fluxogramas'
-description: 'Como YOLO, OCR, análise geométrica e Graphviz podem transformar fluxogramas rasterizados em uma representação estruturada, auditável e reutilizável.'
+title: 'Da imagem ao fluxograma editável: uma explicação sem complicação'
+description: 'Como transformar a imagem de um fluxograma em dados organizados e em um novo diagrama, reduzindo o trabalho manual sem retirar a revisão humana.'
 publishedAt: 2026-08-20
-updatedAt: 2026-08-20
+updatedAt: 2026-08-30
 tags:
   - visao-computacional
-  - yolo
+  - fluxogramas
   - ocr
-  - opencv
-  - graphviz
+  - automacao
 draft: false
 featured: true
 ---
@@ -17,293 +16,252 @@ import { Image } from 'astro:assets';
 import heroImage from '../../assets/articles/flowchart-pipeline/hero-raster-ao-grafo.png';
 import pipelineImage from '../../assets/articles/flowchart-pipeline/pipeline-hibrido.png';
 
-# Da imagem ao grafo editável
+# Da imagem ao fluxograma editável
 
 <figure>
   <Image
     src={heroImage}
-    alt="Um fluxograma rasterizado passa por detecção visual e reaparece como um grafo limpo e editável"
+    alt="Uma imagem de fluxograma passa por análise e reaparece como um diagrama limpo e editável"
     widths={[720, 1080, 1536]}
     sizes="(max-width: 768px) 100vw, 736px"
   />
-  <figcaption>Da esquerda para a direita: documento rasterizado, interpretação visual e grafo reconstruído.</figcaption>
+  <figcaption>O objetivo é recuperar a informação do desenho, e não apenas copiar seus pixels.</figcaption>
 </figure>
 
-Fluxogramas parecem dados estruturados: existem formas, textos e setas que descrevem uma sequência. Para um computador, porém, um fluxograma dentro de uma imagem ou PDF é apenas uma grade de pixels. O processo desenhado está visível, mas não é pesquisável, editável nem diretamente reutilizável por outro sistema.
+> **Resumo.** Este artigo apresenta um projeto que recebe a imagem ou o PDF de um fluxograma, identifica suas formas, lê os textos, procura as conexões e organiza tudo em um formato que pode ser revisado e desenhado novamente. A proposta nasceu de uma situação fictícia: várias equipes enviam fluxogramas feitos de maneiras diferentes, e uma pessoa responsável pelo design precisa redesenhar cada um no padrão visual da organização. O sistema não substitui essa pessoa; ele tenta entregar uma primeira versão organizada para reduzir o trabalho repetitivo.
 
-O projeto [Reconhecimento de fluxograma e conversor](https://github.com/pedrograngeiro/Reconhecimento-de-fluxograma-e-conversor) nasceu para atravessar essa distância. A ideia é combinar modelos de visão, OCR e regras geométricas em um pipeline capaz de produzir uma representação intermediária em JSON e, a partir dela, gerar um novo diagrama com Graphviz.
+## 1. A situação que motivou o projeto
 
-Este artigo responde à seguinte pergunta:
+Imagine uma organização fictícia com várias equipes. Cada equipe registra seus processos do jeito que considera mais fácil. Uma usa uma ferramenta de apresentações, outra exporta um PDF, outra envia uma captura de tela e outra fotografa um desenho feito no papel.
 
-> Como integrar detecção de objetos, OCR e análise geométrica para converter fluxogramas rasterizados em uma representação estruturada e reutilizável?
+Todos esses fluxogramas chegam a uma pessoa responsável pelo design. Antes de aplicar cores, fontes e tamanhos padronizados, ela precisa entender o conteúdo: quais são as etapas, onde existem decisões e para onde cada seta aponta. Muitas vezes, isso significa redesenhar tudo do zero.
 
-A resposta curta é: separando o problema em camadas especializadas, preservando as evidências de cada camada e tratando a topologia como uma etapa própria — não como um efeito colateral da detecção de formas.
+Quando uma etapa muda, parte do trabalho se repete. O problema não é a criatividade do designer, mas o tempo gasto reconstruindo informações que já estavam no documento original.
 
-## 1. O problema por trás da imagem
+O projeto surgiu para testar uma pergunta simples:
 
-Uma captura de tela, uma página escaneada e um PDF rasterizado compartilham a mesma limitação: nenhum deles informa que um retângulo é uma atividade, que o texto dentro dele é seu rótulo ou que uma seta liga duas etapas. Essa semântica precisa ser reconstruída.
+> É possível transformar automaticamente uma imagem de fluxograma em uma base editável, deixando para a pessoa apenas a revisão e o acabamento?
 
-Na prática, a conversão envolve três perguntas diferentes:
+O resultado esperado não é uma cópia perfeita da imagem. É uma representação organizada do processo: uma lista de etapas, decisões, textos e ligações. A partir dela, o fluxograma pode ser redesenhado no padrão desejado.
 
-1. **Quais objetos existem?** Formas de processo, decisão, início/fim, conectores e pontas de seta.
-2. **O que está escrito?** O conteúdo textual contido em cada forma.
-3. **Como os objetos se relacionam?** A origem, o destino e a direção de cada conexão.
+## 2. O que o computador precisa descobrir
 
-Resolver apenas uma delas não basta. OCR aplicado à página inteira mistura rótulos com ruído. Detectar caixas sem conexões produz uma lista, não um fluxo. Detectar linhas sem compreender as formas cria segmentos geométricos sem significado.
+Para uma pessoa, um losango com a frase “Pedido aprovado?” e duas setas é claramente uma decisão. Para o computador, a imagem começa como uma grande tabela de pequenos pontos coloridos, chamados **pixels**.
 
-Por isso, a arquitetura adotada é híbrida: aprendizado de máquina onde há variação visual, processamento clássico onde a geometria é uma evidência forte e regras explícitas onde precisamos controlar o comportamento.
+O programa precisa responder a três perguntas:
 
-## 2. As quatro camadas da solução
+1. **Quais símbolos aparecem?** Por exemplo, retângulos, losangos e setas.
+2. **O que está escrito dentro deles?** Por exemplo, “Validar pedido”.
+3. **Como eles estão ligados?** Ou seja, qual etapa vem antes e qual vem depois.
+
+Responder somente a uma pergunta não resolve o problema. Reconhecer o texto sem conhecer as formas mistura títulos, observações e etapas. Encontrar formas sem seguir as setas produz uma lista, mas não um fluxo. Por isso, o projeto divide o trabalho entre ferramentas especializadas.
+
+### Pequeno glossário
+
+- **Pipeline:** sequência de etapas pelas quais o arquivo passa.
+- **Modelo de visão:** programa treinado com exemplos para reconhecer elementos em imagens.
+- **YOLO:** modelo de visão usado para localizar formas e pontas de seta.
+- **OCR:** tecnologia que transforma texto presente em uma imagem em texto digitável.
+- **Tesseract:** ferramenta de OCR usada pelo projeto.
+- **OpenCV:** biblioteca usada para analisar linhas, bordas e outras características da imagem.
+- **Grafo:** maneira de representar itens e suas ligações. No projeto, cada forma é um nó e cada seta é uma ligação.
+- **JSON:** arquivo de texto organizado que outros programas conseguem ler e editar.
+- **Graphviz:** ferramenta que recebe a descrição do grafo e desenha um novo diagrama.
+- **Dataset:** conjunto de imagens e marcações usado para ensinar e avaliar o modelo.
+- **Confiança:** número que indica o quanto o modelo considera provável que uma detecção esteja correta.
+
+## 3. Como a solução funciona
 
 <figure class="wide-figure">
   <Image
     src={pipelineImage}
-    alt="Diagrama editorial com quatro etapas: detecção de objetos, OCR, extração de conexões e construção do grafo"
+    alt="Seis etapas: abrir o arquivo, encontrar símbolos, ler textos, seguir linhas, organizar dados e redesenhar"
     widths={[720, 1200, 1680]}
     sizes="(max-width: 900px) 100vw, 960px"
   />
-  <figcaption>As responsabilidades são separadas: detectar, ler, conectar e renderizar.</figcaption>
+  <figcaption>Cada ferramenta resolve uma parte do problema e entrega seu resultado à etapa seguinte.</figcaption>
 </figure>
 
-### Detecção de objetos com YOLO
+### Passo 1 — abrir a imagem ou o PDF
 
-O detector identifica as regiões de interesse e devolve, para cada objeto, sua classe, confiança e caixa delimitadora. A implementação mantém o código dependente do Ultralytics concentrado em um adaptador, convertendo a saída do modelo para uma estrutura interna simples.
+Imagens são abertas diretamente. Quando a entrada é um PDF, cada página é transformada temporariamente em imagem. Isso permite que todas as páginas sigam o mesmo caminho dentro do programa.
 
-A versão inicial aceita um modelo de duas classes — `node` e `arrow_head` —, mas o esquema recomendado distingue:
+### Passo 2 — encontrar os símbolos
 
-- `process` para atividades;
-- `decision` para decisões;
-- `terminator` para início e fim;
-- `input_output` para entrada e saída;
-- `connector` para conectores;
-- `arrow_head` para a direção das ligações.
+O YOLO funciona como um marcador visual. Ele desenha uma caixa ao redor de cada elemento reconhecido e informa o tipo provável e sua confiança.
 
-Essa separação melhora a renderização posterior: um nó de decisão pode voltar a ser um losango, enquanto início e fim podem ser desenhados como elipses.
+Os nomes usados no código aparecem em inglês porque seguem uma convenção comum em projetos de programação:
 
-### OCR localizado com Tesseract
+- `process`: uma atividade, normalmente desenhada como retângulo;
+- `decision`: uma decisão, normalmente desenhada como losango;
+- `terminator`: início ou fim do fluxo;
+- `input_output`: entrada ou saída de dados;
+- `connector`: ponto usado para continuar o fluxo;
+- `arrow_head`: ponta da seta, usada para descobrir a direção.
 
-Depois que uma forma é detectada, o OCR trabalha apenas em seu interior. O recorte reduz interferências externas e permite um pré-processamento direcionado: ampliação de textos pequenos, conversão para tons de cinza e limiarização de Otsu.
+Esses nomes não são exibidos para substituir as palavras do fluxograma. Eles apenas informam ao programa qual forma deverá ser usada na reconstrução.
 
-O Tesseract é executado com modo de segmentação `--psm 6` e idioma `por` por padrão. Se o OCR não estiver disponível, o pipeline registra um aviso e continua. Essa degradação controlada é importante: ainda é possível recuperar formas e topologia, mesmo que os rótulos fiquem vazios.
+### Passo 3 — ler o texto
 
-### Linhas, setas e geometria com OpenCV
+Depois de encontrar uma forma, o programa recorta somente sua parte interna e envia esse pequeno recorte ao Tesseract. Essa leitura localizada reduz a interferência de setas, bordas e textos próximos.
 
-As conexões não são inferidas apenas pela proximidade entre caixas. Primeiro, as regiões ocupadas pelos nós são mascaradas. Em seguida, a imagem passa por desfoque gaussiano, Canny e transformada probabilística de Hough para encontrar segmentos de linha.
+O OCR pode cometer erros, principalmente quando as letras são pequenas, a imagem está desfocada ou a borda da forma encosta no texto. Por isso, o texto reconhecido permanece disponível para revisão.
 
-Os valores iniciais usados pelo projeto são Canny entre 50 e 150, limiar de Hough igual a 18, comprimento mínimo de 24 pixels e lacuna máxima de 16 pixels. Eles são um ponto de partida, não constantes universais: resolução, espessura dos traços e ruído alteram o resultado.
+### Passo 4 — seguir as linhas e as setas
 
-Para montar uma aresta, o algoritmo:
+O OpenCV ajuda a destacar bordas e segmentos de linha. O programa procura uma ponta de seta, identifica o símbolo próximo a ela e acompanha os segmentos na direção oposta até encontrar a provável origem.
 
-1. associa uma ponta de seta ao nó de destino mais próximo;
-2. encontra o segmento que chega à ponta;
-3. reúne segmentos que formam um mesmo componente conectado;
-4. procura, entre os demais nós, a origem mais próxima desse componente;
-5. rejeita pares distantes, duplicados ou sem evidência visual suficiente.
+Essa etapa é conservadora: quando não existe uma linha visível, o sistema prefere deixar a ligação ausente em vez de inventar uma relação. Uma ligação omitida pode ser adicionada na revisão; uma ligação falsa pode mudar o sentido do processo sem chamar atenção.
 
-Essa decisão é deliberadamente conservadora. Sem uma linha visível, o sistema prefere omitir a aresta a inventar uma relação.
+### Passo 5 — organizar o resultado
 
-### Grafo intermediário e Graphviz
+As informações são gravadas em JSON. Nesse arquivo, **nó** significa uma forma do fluxograma e **aresta** significa uma ligação entre duas formas.
 
-O resultado não vai direto para uma imagem final. Primeiro ele se transforma em um grafo com nós, arestas e metadados. Essa camada intermediária desacopla reconhecimento e apresentação: o mesmo JSON pode alimentar Graphviz hoje e, futuramente, Mermaid, BPMN ou uma interface de edição.
-
-Os identificadores dos nós são determinísticos, seguindo a ordem visual de cima para baixo e da esquerda para a direita. Isso facilita comparar execuções e revisar diferenças.
-
-Um resultado reduzido tem esta forma:
+Um exemplo reduzido é:
 
 ```json
 {
-  "schema_version": "1.0",
   "nodes": [
-    {
-      "id": "n1",
-      "type": "process",
-      "text": "Validar pedido",
-      "bbox": [40, 28, 260, 102],
-      "confidence": 0.94
-    }
+    { "id": "n1", "type": "process", "text": "Validar pedido" },
+    { "id": "n2", "type": "decision", "text": "Está aprovado?" }
   ],
   "edges": [
-    {
-      "id": "e1",
-      "source": "n1",
-      "target": "n2",
-      "confidence": 0.78,
-      "label": null
-    }
-  ],
-  "metadata": {
-    "source": "triagem.png",
-    "page": 1,
-    "line_segments": 12
-  }
+    { "source": "n1", "target": "n2" }
+  ]
 }
 ```
 
-O renderizador converte esse grafo para DOT e aplica formas compatíveis com os tipos reconhecidos. A saída padrão é SVG, com direção vertical e conexões ortogonais, mas PNG e PDF também podem ser solicitados.
+Em linguagem comum, esse trecho diz: existe uma etapa chamada “Validar pedido”, depois existe uma decisão chamada “Está aprovado?”, e a primeira leva à segunda.
 
-## 3. Arquitetura do pipeline
+### Passo 6 — desenhar novamente
 
-O fluxo completo pode ser resumido assim:
+O Graphviz recebe essa estrutura e calcula uma nova posição para os elementos. Uma decisão volta a ser um losango, um início ou fim volta a ter forma arredondada e as conexões são redesenhadas.
 
-```text
-Imagem ou PDF
-      ↓
-Normalização da página
-      ↓
-YOLO ──→ formas + pontas de seta
-  │
-  ├────→ recortes ──→ Tesseract ──→ textos
-  │
-  └────→ máscaras ──→ Canny/Hough ──→ segmentos
-                                      ↓
-                          associação geométrica
-                                      ↓
-                               grafo em JSON
-                                      ↓
-                             DOT + Graphviz
-```
+O projeto pode gerar SVG, PNG e PDF. O SVG é útil porque mantém textos e formas em formato vetorial, sem perder qualidade quando a imagem é ampliada.
 
-Imagens são carregadas com OpenCV. PDFs são rasterizados página por página com PyMuPDF, usando 200 DPI por padrão e nunca menos de 72 DPI. Cada página percorre o mesmo pipeline e recebe arquivos de saída próprios.
+## 4. Por que o JSON é tão importante
 
-A modularidade tem uma vantagem operacional: cada estágio pode ser testado isoladamente. É possível substituir o detector por um falso em testes, validar o JSON sem executar OCR e verificar as regras topológicas com coordenadas controladas.
+Gerar apenas uma nova imagem esconderia os erros dentro de outro arquivo visual. O JSON permite conferir cada texto e cada ligação antes da publicação final.
 
-## 4. Preparação do dataset e treinamento
+Essa separação também ajuda o designer do cenário fictício. Em vez de redesenhar o documento inteiro, ele pode corrigir um nome, trocar o tipo de uma forma ou ajustar uma ligação. Depois, o programa publica novamente o fluxograma com o padrão de cores e formas escolhido.
 
-A parte de visão depende de um dataset que represente o uso real. Um modelo treinado apenas com diagramas vetoriais limpos pode falhar em fotografias, documentos comprimidos ou capturas com fundo colorido.
+No futuro, o mesmo JSON poderá alimentar outros formatos, como Mermaid ou BPMN, sem executar novamente o reconhecimento da imagem original.
 
-### Regras de anotação
+## 5. Estudo de caso 1 — o fluxo de trabalho do designer
 
-As caixas dos nós devem envolver toda a forma, sem absorver conectores próximos. A classe `arrow_head` cobre somente a ponta da seta, não a linha inteira. O texto não é uma classe do YOLO: ele será lido pelo OCR dentro da caixa detectada.
+Considere três equipes fictícias preparando fluxogramas para um mesmo manual interno. A primeira entrega um PDF em preto e branco. A segunda usa cores e sombras. A terceira envia uma captura de tela com letras pequenas.
 
-Objetos ambíguos precisam de revisão. Uma anotação inconsistente ensina ao modelo uma fronteira inconsistente e transfere a dúvida para todo o restante do pipeline.
+### Antes da conversão
 
-### Divisão do conjunto
+O designer precisa abrir cada arquivo, interpretar o processo, criar novamente todas as formas, copiar os textos e refazer as setas. Além disso, precisa decidir como traduzir estilos diferentes para um único padrão visual. Se houver dúvida sobre uma conexão, é necessário voltar à equipe responsável.
 
-A recomendação é dividir os dados em 70% para treino, 15% para validação e 15% para teste. A divisão deve ocorrer por documento ou origem, e não por imagem aleatória. Páginas quase idênticas do mesmo PDF em treino e teste provocariam vazamento e uma avaliação artificialmente otimista.
+### Com o conversor
 
-### Configuração inicial
+Cada documento passa pelas seis etapas descritas anteriormente. O sistema entrega um JSON e uma primeira versão redesenhada. Os itens de baixa confiança e as ligações ausentes continuam exigindo revisão humana.
 
-O script `treinar.py` oferece uma configuração conservadora para hardware limitado: YOLOv8 nano, imagens de 640 pixels, 100 épocas, lote 8, zero workers e execução em CPU.
+O designer passa a concentrar seu tempo em três tarefas: confirmar se o processo foi compreendido corretamente, corrigir as exceções e aplicar decisões visuais que realmente exigem julgamento. O trabalho mecânico de recriar caixas e copiar palavras pode ser reduzido.
+
+### O que esse cenário não promete
+
+Esse caso explica o objetivo do produto, não mede economia real de tempo. Para afirmar quantas horas foram poupadas, seria necessário acompanhar vários documentos, registrar o tempo antes e depois e comparar pessoas e níveis de complexidade diferentes.
+
+Também não se trata de um caso ligado a uma organização específica. A história é fictícia e serve apenas para mostrar um problema plausível.
+
+## 6. Estudo de caso 2 — quando o primeiro modelo falhou
+
+O segundo estudo aconteceu durante o desenvolvimento e ajuda a entender por que um teste aparentemente bom pode falhar no mundo real.
+
+### Contexto inicial
+
+O primeiro modelo foi treinado com imagens sintéticas simples: formas grandes, fundo limpo e poucas variações. Nos testes feitos com imagens produzidas pelo mesmo gerador, os números pareciam promissores.
+
+Quando esse modelo recebeu um fluxograma com aparência de documento — formas menores, linhas finas e várias ramificações — ele não encontrou nenhum dos 14 símbolos esperados usando a confiança mínima normal de 0,25. Reduzir esse valor para 0,05 revelou apenas um losango com confiança muito baixa. O problema não estava no JSON: o modelo não estava reconhecendo a entrada.
+
+### O que foi alterado
+
+Foi criado um segundo conjunto sintético mais parecido com documentos. Ele contém 224 páginas: 160 para treinamento, 32 para validação e 32 para teste. As páginas têm fundo branco, formas cinza, linhas finas, textos curtos e ramificações laterais.
+
+O treinamento passou a usar imagens de 640 pixels para preservar detalhes. Ele foi interrompido depois da sexta época, quando o caso de aceitação já apresentava os objetos esperados e os resultados no conjunto sintético haviam estabilizado.
+
+O Tesseract também foi instalado e ajustado. Antes disso, apenas o pacote Python que conversa com o Tesseract estava presente; o programa de OCR propriamente dito ainda não estava instalado. São duas partes diferentes.
+
+### Resultado observado
+
+No mesmo fluxograma documental usado como caso de aceitação, a comparação foi:
+
+| Resultado no único documento | Primeiro modelo | Modelo ajustado |
+| --- | ---: | ---: |
+| Símbolos encontrados | 0 de 14 | 14 de 14 |
+| Textos preenchidos | 0 de 14 | 14 de 14 |
+| Textos exatamente corretos | 0 de 14 | 12 de 14 |
+| Ligações corretas encontradas | 0 de 15 | 14 de 15 |
+| Ligações falsas | 0 | 0 |
+
+Os dois textos não reconhecidos de forma exata continuaram compreensíveis: “Dia de sol?” perdeu um espaço, e “Jogar futebol” recebeu uma exclamação. A ligação ausente saía da decisão “Cansado?” em direção a “Jogar futebol”.
+
+O documento original não é publicado porque sua licença de redistribuição não pôde ser comprovada. Ele foi usado localmente durante o desenvolvimento e influenciou o momento de parar o treinamento. Portanto, esse resultado deve ser chamado de **caso de aceitação**, e não de teste cego.
+
+### O que aprendemos
+
+O resultado mostra que aproximar os exemplos de treinamento do tipo de documento esperado pode melhorar muito um caso específico. Ele não prova que o sistema funciona com qualquer fluxograma.
+
+Em outros estilos, principalmente diagramas coloridos, com sombras ou estrutura de mapa de site, o desempenho ainda foi parcial ou nulo. Os bons números obtidos nas imagens sintéticas medem principalmente a família de imagens criada pelo próprio gerador.
+
+## 7. Como experimentar o projeto
+
+O código está disponível no [repositório do projeto](https://github.com/pedrograngeiro/Reconhecimento-de-fluxograma-e-conversor). O guia completo explica instalação, treinamento, pastas e configurações.
+
+Depois de instalar o projeto e possuir um modelo treinado, uma imagem pode ser processada assim:
 
 ```powershell
-python treinar.py `
-  --data flow-chart/data.yaml `
-  --model yolov8n.pt `
-  --epochs 100 `
-  --batch 8 `
-  --device cpu
-```
-
-O treinamento é determinístico com semente 42 e pode ser retomado a partir de `last.pt` com `--resume`. Em uma GPU com pouca memória, reduzir `batch` costuma ser mais seguro do que reduzir imediatamente a resolução, porque formas pequenas e pontas de seta dependem de detalhes.
-
-Os pesos treinados e o dataset não fazem parte do repositório. Portanto, o código está pronto para receber um modelo, mas a qualidade final continuará dependente das classes, das anotações e da diversidade desse material.
-
-## 5. Como utilizar o projeto
-
-O projeto requer Python 3.10 ou superior. Em Windows, a instalação completa pode ser feita assim:
-
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -e ".[full,dev]"
-```
-
-Além dos pacotes Python, o OCR exige o executável do Tesseract e a renderização visual exige o Graphviz disponível no `PATH`.
-
-Para converter uma imagem:
-
-```powershell
-flowchart-converter pagina_1.png `
-  --model "modelo treinado/best.pt" `
+flowchart-converter exemplo.png `
+  --model caminho\para\best.pt `
   --output-dir output
 ```
 
-Também é possível executar o módulo diretamente:
+Um JSON já revisado pode ser transformado em SVG, PNG e PDF sem repetir o reconhecimento:
 
 ```powershell
-python -m flowchart_converter pagina_1.png `
-  --model "modelo treinado/best.pt" `
-  --output-dir output
-```
-
-Para um PDF, solicitando SVG e PNG a 250 DPI:
-
-```powershell
-flowchart-converter documento.pdf `
-  --model "modelo treinado/best.pt" `
+flowchart-render fluxo.json `
+  --output-dir output\publicacao `
   --format svg `
   --format png `
-  --dpi 250
+  --format pdf
 ```
 
-Uma entrada `triagem.png` produz `triagem.json`, `triagem.dot` e, quando Graphviz está instalado, `triagem.svg`. Em PDFs, os nomes recebem o número da página, como `documento-page-001.json`.
-
-O JSON é o artefato mais importante para integração. Ele pode ser indexado para pesquisa, transformado por outro programa ou carregado em uma interface que permita corrigir textos e conexões antes da exportação final. O DOT é editável e funciona como uma ponte transparente para Graphviz.
-
-## 6. Estudo de caso controlado
-
-Sem pesos treinados distribuídos com o repositório, ainda não seria honesto apresentar uma imagem arbitrária como demonstração de acurácia ponta a ponta. O caso mais reprodutível hoje é o cenário geométrico coberto pelos testes automatizados.
-
-Nele, existem dois nós: um processo acima e uma decisão abaixo. Uma linha vertical parte do primeiro nó, aproxima-se de uma ponta de seta e termina junto ao segundo. Com essas evidências, o construtor topológico associa `n1` a `n2` e cria uma única aresta cuja confiança nunca ultrapassa a confiança da ponta detectada.
-
-O teste complementar remove a linha, preservando os nós e a ponta de seta. O resultado esperado é uma lista vazia de arestas. Esse par de casos registra um princípio central do projeto: proximidade não substitui evidência geométrica.
-
-Outro teste executa a conversão de uma página com detector e OCR controlados. Ele verifica a criação de dois nós, a propagação do texto reconhecido e a escrita dos arquivos JSON e DOT. Assim, a orquestração é validada sem depender de instalações externas ou de um modelo específico.
-
-Os visuais deste artigo ilustram o fluxo conceitual, não resultados de inferência usados para medir precisão. Um estudo de caso empírico completo será possível quando houver um conjunto de teste congelado e pesos versionados.
-
-## 7. Avaliação: o que já foi medido
-
-A suíte automatizada contém **10 testes**, todos passando na revisão realizada para este artigo. Eles cobrem o esquema do grafo, compatibilidade de classes, detecção de um conector sintético, reconstrução de uma aresta, recusa em inventar conexões, geração de DOT e orquestração do pipeline.
-
-Também existe um benchmark parcial do estágio leve de imagem. Em 20 de agosto de 2026, quatro imagens foram processadas em um Ryzen 5 5600G, com OpenCV 4.13 usando uma thread, duas execuções de aquecimento e dez repetições por imagem.
-
-| Imagem | Resolução | Segmentos brutos | Mediana total | p95 |
-| --- | ---: | ---: | ---: | ---: |
-| decisão simples | 960 × 720 | 12 | 8,525 ms | 10,054 ms |
-| fluxo de programa | 960 × 1358 | 179 | 24,005 ms | 24,752 ms |
-| algoritmo horizontal | 676 × 204 | 154 | 4,833 ms | 5,521 ms |
-| automação complexa | 1516 × 1181 | 850 | 44,145 ms | 50,373 ms |
-
-A soma das medianas foi 81,508 ms para as quatro imagens. Esse número inclui apenas decodificação PNG, Canny e Hough; não inclui YOLO, OCR, rasterização de PDF nem Graphviz. Os segmentos são detecções brutas, não conexões corretas, porque o benchmark não utiliza as caixas do YOLO para mascarar formas e textos.
-
-Portanto, este resultado é um limite inferior de latência, não uma medida do pipeline completo. Também ainda não existem números defensáveis de acurácia para formas, textos ou conexões.
-
-Uma avaliação ponta a ponta deverá medir cada camada separadamente:
-
-- precisão, revocação e mAP para formas e pontas de seta;
-- CER e WER para OCR;
-- precisão, revocação e F1 dos pares origem-destino;
-- proporção de diagramas com nós, textos e arestas integralmente corretos;
-- latência por etapa, resolução e dispositivo.
-
-Essa decomposição é essencial. Uma imagem final “parecida” pode esconder texto incorreto ou uma ligação invertida — justamente os erros mais perigosos quando o grafo passa a alimentar outro sistema.
+O repositório possui atualmente 30 testes automatizados. Eles verificam partes como o formato do JSON, o tratamento das classes, a leitura localizada, a reconstrução de conexões e a geração dos arquivos. Esses testes protegem o comportamento do código, mas não substituem uma avaliação com muitos documentos reais.
 
 ## 8. Limitações e próximos passos
 
-O pipeline atual funciona melhor com diagramas limpos, formas regulares e conectores visíveis. Algumas classes de problema continuam abertas:
+O sistema funciona melhor com formas regulares, textos legíveis e linhas bem definidas. Ainda existem dificuldades com:
 
-- setas curvas, cruzadas, interrompidas ou muito próximas;
-- fotografias com perspectiva, sombra e iluminação irregular;
+- setas curvas, cruzadas, interrompidas ou apagadas;
+- fotografias inclinadas, sombras e baixa iluminação;
 - escrita manual e fontes incomuns;
-- rótulos de aresta como “Sim” e “Não”;
-- múltiplas conexões que chegam à mesma ponta;
-- diagramas cuja direção não é marcada por uma seta detectável.
+- palavras como “Sim” e “Não” escritas ao lado das setas;
+- diagramas muito diferentes daqueles usados no treinamento;
+- várias conexões próximas umas das outras.
 
-Uma evolução natural é aplicar esqueletização para acompanhar conectores curvos e correção de perspectiva antes da inferência. Outra é criar OCR específico para rótulos de arestas.
+O próximo passo mais importante não é eliminar completamente a revisão humana. É criar uma interface em que a pessoa possa ver as partes incertas, corrigir textos e reposicionar ligações com rapidez.
 
-O próximo salto de usabilidade, porém, provavelmente virá de uma interface de revisão humana. Em vez de exigir automação perfeita, o sistema pode destacar regiões de baixa confiança, permitir reposicionar uma ligação e salvar a correção no JSON. Essa interação também gera exemplos valiosos para melhorar o dataset.
-
-Com a representação intermediária estabilizada, exportadores para Mermaid e BPMN se tornam independentes do reconhecimento visual. Também será possível validar equivalência estrutural entre o grafo previsto e um grafo de referência, uma métrica mais útil do que comparar apenas pixels das imagens finais.
+Também será necessário montar um conjunto de avaliação formado por documentos reais, com licenças claras e respostas esperadas. Assim será possível medir separadamente o reconhecimento das formas, a leitura dos textos e a reconstrução das ligações.
 
 ## 9. Conclusão
 
-Converter um fluxograma rasterizado não é apenas reconhecer símbolos. É reconstruir uma linguagem visual composta por objetos, texto, direção e topologia.
+Transformar uma imagem de fluxograma em um diagrama editável exige mais do que reconhecer desenhos. O programa precisa localizar símbolos, ler palavras, seguir setas e reconstruir a ordem do processo.
 
-O pipeline híbrido distribui essas responsabilidades de acordo com sua natureza: YOLO lida com a variedade das formas, Tesseract lê regiões localizadas, OpenCV recupera evidências geométricas e regras explícitas montam o grafo. JSON preserva o resultado de maneira auditável; DOT e Graphviz devolvem uma visualização editável.
+A solução divide esse trabalho: o YOLO encontra os elementos, o Tesseract lê os textos, o OpenCV procura as linhas e o Graphviz organiza uma nova apresentação. O JSON mantém o resultado aberto para conferência e correção.
 
-A primeira versão já demonstra a arquitetura, produz artefatos intermediários e protege comportamentos essenciais com testes. Ainda falta o elemento que transforma essa base em uma avaliação completa: um dataset representativo, pesos versionados e um conjunto de teste congelado.
+No cenário fictício, isso pode reduzir a parte repetitiva do trabalho do designer. No experimento real, o primeiro modelo falhou e o segundo resolveu quase todo um caso documental, mas ainda não generalizou para todos os estilos. Essa diferença é importante: o projeto já demonstra um caminho útil, mas continua sendo uma ferramenta experimental que precisa de revisão humana e avaliação mais ampla.
 
-Esse limite não diminui o projeto; ele define com precisão seu próximo experimento. O objetivo final não é apenas redesenhar uma imagem, mas recuperar uma estrutura que possa ser pesquisada, corrigida, versionada e reutilizada.
+## 10. Referências
 
+1. CANNY, John. [*A Computational Approach to Edge Detection*](https://doi.org/10.1109/TPAMI.1986.4767851). IEEE Transactions on Pattern Analysis and Machine Intelligence, v. PAMI-8, n. 6, p. 679–698, 1986.
+2. MATAS, Jiří; GALAMBOS, Charles; KITTLER, Josef. [*Robust Detection of Lines Using the Progressive Probabilistic Hough Transform*](https://doi.org/10.1006/cviu.1999.0831). Computer Vision and Image Understanding, v. 78, n. 1, p. 119–137, 2000.
+3. SMITH, Ray. [*An Overview of the Tesseract OCR Engine*](https://research.google/pubs/an-overview-of-the-tesseract-ocr-engine/). Ninth International Conference on Document Analysis and Recognition, p. 629–633, 2007.
+4. GANSNER, Emden R.; KOUTSOFIOS, Eleftherios; NORTH, Stephen C.; VO, Kiem-Phong. [*A Technique for Drawing Directed Graphs*](https://doi.org/10.1109/32.221135). IEEE Transactions on Software Engineering, v. 19, n. 3, p. 214–230, 1993.
+5. OPENCV. [*Canny Edge Detection*](https://docs.opencv.org/4.x/da/d22/tutorial_py_canny.html) e [*Hough Line Transform*](https://docs.opencv.org/4.x/d6/d10/tutorial_py_houghlines.html). Documentação oficial. Acesso em 30 ago. 2026.
+6. ULTRALYTICS. [*Model Training with Ultralytics YOLO*](https://docs.ultralytics.com/modes/train/). Documentação oficial. Acesso em 30 ago. 2026.
+7. TESSERACT OCR. [*Command Line Usage*](https://tesseract-ocr.github.io/tessdoc/Command-Line-Usage.html). Documentação oficial. Acesso em 30 ago. 2026.
+8. GRAPHVIZ. [*dot — hierarchical layouts of directed graphs*](https://graphviz.org/docs/layouts/dot/). Documentação oficial. Acesso em 30 ago. 2026.
+9. GRANGEIRO, Pedro. [*Reconhecimento de fluxograma e conversor*](https://github.com/pedrograngeiro/Reconhecimento-de-fluxograma-e-conversor). Código-fonte, documentação, testes e dados de benchmark, 2026.
