@@ -100,6 +100,10 @@ const { Content } = await render(entry);
   }
 
   .project-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
     padding-bottom: 0.25rem;
     border-bottom: 1px solid var(--ink);
     color: var(--ink);
@@ -111,7 +115,7 @@ const { Content } = await render(entry);
     color: var(--accent);
   }
 
-  @media (max-width: 38rem) {
+  @media (max-width: 48rem) {
     .project-facts {
       grid-template-columns: 1fr;
     }
