@@ -13,8 +13,6 @@ draft: false
 featured: false
 ---
 
-# FocoBonde: quando estudar junto virou um bot
-
 Durante a pandemia, estudar deixou de ser apenas uma atividade individual. Sem a mudança de ambiente, o caminho até a biblioteca ou a presença silenciosa de outras pessoas, era fácil perder a fronteira entre começar, continuar e parar. O dia acontecia inteiro no mesmo lugar.
 
 Foi nesse período que passei a frequentar lives de Pomodoro. A principal era a da [Clara Matheus, na Twitch](https://www.twitch.tv/claramatheus). Na tela, o cronômetro alternava blocos de foco e descanso. Ao redor dele, o chat criava algo que o relógio sozinho não oferecia: companhia.

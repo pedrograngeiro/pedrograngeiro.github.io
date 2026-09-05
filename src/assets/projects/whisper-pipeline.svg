@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" role="img" aria-labelledby="title desc">
+<title id="title">Do vídeo à legenda com Whisper</title><desc id="desc">FFmpeg extrai áudio MP3 de um vídeo. Whisper transforma esse áudio em transcrição TXT e legenda SRT.</desc>
+<rect width="1000" height="500" fill="#f7f3e9"/>
+<g font-family="system-ui,sans-serif" fill="#1c3040">
+<text x="60" y="72" font-size="20" letter-spacing="3">ÁUDIO · TRANSCRIÇÃO · LEGENDAS</text>
+<text x="60" y="130" font-size="36" font-weight="700">Um vídeo. Três arquivos reutilizáveis.</text>
+<g fill="#fffcf5" stroke="#356b46" stroke-width="3">
+<rect x="60" y="220" width="220" height="100" rx="12"/><rect x="390" y="220" width="220" height="100" rx="12"/><rect x="720" y="185" width="220" height="80" rx="12"/><rect x="720" y="295" width="220" height="80" rx="12"/>
+</g>
+<g stroke="#356b46" stroke-width="4" fill="none"><path d="M280 270H378m-12-10 12 10-12 10M610 270H665V225H706m-12-10 12 10-12 10M665 270V335H706m-12-10 12 10-12 10"/></g>
+<g text-anchor="middle" font-size="26" font-weight="700"><text x="170" y="280">vídeo.mp4</text><text x="500" y="280">áudio.mp3</text><text x="830" y="236">texto.txt</text><text x="830" y="346">legenda.srt</text></g>
+<g font-size="18" text-anchor="middle" fill="#43544f"><text x="335" y="207">FFmpeg</text><text x="665" y="158">Whisper</text></g>
+<text x="60" y="446" font-size="20" fill="#43544f">Processamento local · Modelo configurável · Saída em formatos abertos</text>
+</g></svg>

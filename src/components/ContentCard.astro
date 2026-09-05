@@ -14,7 +14,7 @@ interface Props {
 const { href, kind, title, description, publishedAt, tags = [], status } = Astro.props;
 ---
 
-<article class="content-card">
+<article class="content-card" data-reveal>
   <div class="meta">
     <span>{kind}</span>
     <time datetime={publishedAt.toISOString()}>{formatDate(publishedAt)}</time>
@@ -38,7 +38,8 @@ const { href, kind, title, description, publishedAt, tags = [], status } = Astro
     transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
   }
 
-  .content-card:hover {
+  .content-card:hover,
+  .content-card:focus-within {
     border-color: var(--accent);
     box-shadow: 0.35rem 0.35rem 0 var(--accent-soft);
     transform: translate(-0.15rem, -0.15rem);
