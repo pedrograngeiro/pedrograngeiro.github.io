@@ -14,7 +14,7 @@ interface Props {
 const { href, kind, title, description, publishedAt, tags = [], status } = Astro.props;
 ---
 
-<article class="content-card">
+<article class="content-card" data-reveal>
   <div class="meta">
     <span>{kind}</span>
     <time datetime={publishedAt.toISOString()}>{formatDate(publishedAt)}</time>
@@ -38,7 +38,8 @@ const { href, kind, title, description, publishedAt, tags = [], status } = Astro
     transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
   }
 
-  .content-card:hover {
+  .content-card:hover,
+  .content-card:focus-within {
     border-color: var(--accent);
     box-shadow: 0.35rem 0.35rem 0 var(--accent-soft);
     transform: translate(-0.15rem, -0.15rem);
@@ -57,11 +58,11 @@ const { href, kind, title, description, publishedAt, tags = [], status } = Astro
   }
 
   h2 {
-    margin: 2.5rem 0 0.75rem;
-    font-size: clamp(1.7rem, 4vw, 2.35rem);
+    margin: 1.5rem 0 0.75rem;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
     font-weight: 500;
     letter-spacing: -0.04em;
-    line-height: 1;
+    line-height: 1.15;
     overflow-wrap: anywhere;
   }
 
@@ -101,5 +102,11 @@ const { href, kind, title, description, publishedAt, tags = [], status } = Astro
     margin-right: 0.4rem;
     border-radius: 50%;
     background: var(--accent);
+  }
+
+  @media (max-width: 40rem) {
+    .content-card { min-height: 0; padding: 1rem; }
+    .meta, .footer { font-size: 0.72rem; gap: 0.5rem; }
+    .footer { margin-top: 1.25rem; }
   }
 </style>

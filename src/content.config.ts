@@ -13,8 +13,12 @@ const common = {
 
 const projects = defineCollection({
   loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     ...common,
+    cover: image().optional(),
+    coverAlt: z.string().optional(),
+    coverCaption: z.string().optional(),
+    article: z.string().url().optional(),
     role: z.string().optional(),
     stack: z.array(z.string()).default([]),
     outcome: z.string().optional(),
