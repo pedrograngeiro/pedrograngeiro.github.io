@@ -59,6 +59,11 @@ const tags = [...counts.entries()].sort(([a], [b]) => a.localeCompare(b, 'pt-BR'
     text-decoration: none;
   }
 
+  a > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
   a:hover {
     color: var(--accent-strong);
     background: var(--accent-soft);

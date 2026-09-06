@@ -1,0 +1,39 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+interface Props { entry: CollectionEntry<'projects'> }
+const { entry } = Astro.props;
+---
+<article class="featured-project" data-reveal>
+  {entry.data.cover && (
+    <figure>
+      <Image src={entry.data.cover} alt={entry.data.coverAlt ?? entry.data.title}
+        widths={[480, 800, 1200]} sizes="(max-width: 832px) calc(100vw - 2rem), 600px"
+        loading="lazy" />
+      {entry.data.coverCaption && <figcaption>{entry.data.coverCaption}</figcaption>}
+    </figure>
+  )}
+  <div class="copy">
+    <p class="kicker">Estudo de caso · {entry.data.stack.slice(0, 3).join(' · ')}</p>
+    <h3><a href={'/projetos/' + entry.id + '/'}>{entry.data.title}</a></h3>
+    <p>{entry.data.description}</p>
+    {entry.data.outcome && <div class="result"><span>Resultado documentado</span><p>{entry.data.outcome}</p></div>}
+    <a class="read-case" href={'/projetos/' + entry.id + '/'}>Explorar o projeto <span aria-hidden="true">→</span></a>
+  </div>
+</article>
+<style>
+  .featured-project { display: flex; flex-direction: column; border: 1px solid var(--line); background: var(--paper-raised); }
+  figure { margin: 0; border-bottom: 1px solid var(--line); }
+  figure :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: contain; background: var(--surface); }
+  figcaption { padding: 0.7rem 1.25rem; color: var(--muted); font: 500 0.72rem/1.5 var(--ui); }
+  .copy { display: flex; flex: 1; flex-direction: column; padding: clamp(1.25rem, 3vw, 2rem); }
+  h3 { margin: 0 0 1rem; font-size: clamp(1.7rem, 3vw, 2.5rem); font-weight: 500; line-height: 1.1; letter-spacing: -0.035em; overflow-wrap: anywhere; }
+  h3 a { text-decoration: none; }
+  h3 a:hover { color: var(--accent-strong); }
+  .copy > p:not(.kicker), .result p { color: var(--ink-soft); font-size: 1.05rem; line-height: 1.65; }
+  .copy > p:not(.kicker) { margin: 0 0 1.5rem; }
+  .result { margin-top: auto; padding: 1rem; border-left: 3px solid var(--accent); background: var(--accent-soft); }
+  .result span { color: var(--accent-strong); font: 700 0.7rem/1.5 var(--mono); }
+  .result p { margin: 0.4rem 0 0; }
+  .read-case { align-self: start; display: inline-flex; align-items: center; gap: 1rem; min-height: 2.75rem; margin-top: 1rem; color: var(--accent-strong); font: 700 0.85rem/1.5 var(--ui); text-underline-offset: 0.25em; }
+</style>

@@ -37,3 +37,11 @@ não aparecem no CMS.
 Antes de salvar um item MDX, preserve os imports e os componentes existentes.
 Uma alteração sintaticamente inválida será rejeitada pelo build do Astro e não
 substituirá a última versão publicada com sucesso.
+
+## Títulos e destaques
+
+O campo **Título** é exibido pelo layout como o único H1 da página. Comece as seções do corpo com ##; não repita o título com #.
+
+Projetos com **Projeto em destaque** ativado aparecem na seleção da página inicial. **Demonstração** deve apontar para uma aplicação ou vídeo; use **Explicação técnica** para artigos.
+
+Capas opcionais dos projetos são configuradas no frontmatter com cover (caminho relativo ao arquivo), coverAlt e coverCaption. Use a legenda para identificar diagramas conceituais e exemplos ilustrativos.

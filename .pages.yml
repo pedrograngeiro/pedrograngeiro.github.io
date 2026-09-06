@@ -243,6 +243,10 @@ content:
         label: Repositório
         type: string
         description: URL completa do repositório.
+      - name: article
+        label: Explicação técnica
+        type: string
+        description: URL do artigo que explica o projeto.
       - name: demo
         label: Demonstração
         type: string

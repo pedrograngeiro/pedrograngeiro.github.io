@@ -13,8 +13,6 @@ draft: false
 featured: true
 ---
 
-# Por dentro do FocoBot
-
 O [FocoBot](https://github.com/pedrograngeiro/FocoBot) começou em 2021 com uma função bastante concreta: manter no Discord o ritmo de foco que uma comunidade já praticava em lives. O bot deveria iniciar 25 minutos de trabalho, sinalizar uma pausa curta de 5 minutos e, depois de alguns ciclos, oferecer uma pausa maior.
 
 A regra parece simples quando escrita em uma linha. Em software, ela abre uma sequência de perguntas: quem controla o cronômetro? O que acontece quando alguém envia o mesmo comando duas vezes? Como pausar sem perder o tempo decorrido? Dois servidores podem usar o bot ao mesmo tempo? Como tocar um alerta sem bloquear a contagem?

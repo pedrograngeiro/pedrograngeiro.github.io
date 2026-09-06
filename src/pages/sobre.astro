@@ -138,6 +138,10 @@ import { siteConfig } from '../config/site';
   }
 
   .profile-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
     padding-bottom: 0.3rem;
     border-bottom: 1px solid var(--ink);
     color: var(--ink);
@@ -149,7 +153,7 @@ import { siteConfig } from '../config/site';
     color: var(--accent);
   }
 
-  @media (max-width: 42rem) {
+  @media (max-width: 48rem) {
     .about-grid {
       grid-template-columns: 1fr;
     }

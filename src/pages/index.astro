@@ -1,44 +1,39 @@
 ---
 import { getCollection } from 'astro:content';
-import { getImage } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
+import profilePhoto from '../../img/pedro-grangeiro-profile.jpg';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ContentCard from '../components/ContentCard.astro';
-import { byNewest, isVisible } from '../lib/content';
+import { byNewest, isVisible, getContentIndex } from '../lib/content';
 import mascotLight from '../assets/brand/g-dev-mascot-light.png';
 import mascotDark from '../assets/brand/g-dev-mascot-dark.png';
-import profilePhoto from '../../img/pedro-grangeiro-profile.jpg';
+import FeaturedProject from '../components/FeaturedProject.astro';
+import { siteConfig } from '../config/site';
 
-const [projects, posts, notes] = await Promise.all([
-  getCollection('projects', isVisible),
-  getCollection('blog', isVisible),
-  getCollection('notes', isVisible),
-]);
+const projects = await getCollection('projects', isVisible);
+const featuredProjects = projects.filter((entry) => entry.data.featured).sort(byNewest);
+const recentContent = (await getContentIndex()).slice(0, 6);
 
-const recentProjects = projects.sort(byNewest).slice(0, 2);
-const recentPosts = posts.sort(byNewest).slice(0, 2);
-const recentNotes = notes.sort(byNewest).slice(0, 2);
-const hasRecentContent = recentProjects.length + recentPosts.length + recentNotes.length > 0;
-
-const [lightMascot, darkMascot, profile] = await Promise.all([
+const [lightMascot, darkMascot] = await Promise.all([
   getImage({ src: mascotLight, width: 560, height: 560, format: 'webp', quality: 82 }),
   getImage({ src: mascotDark, width: 560, height: 560, format: 'webp', quality: 82 }),
-  getImage({ src: profilePhoto, width: 720, format: 'webp', quality: 84 }),
 ]);
 ---
 
 <BaseLayout>
   <section class="hero">
     <div class="hero-copy">
-      <p class="eyebrow"><span>Pedro Grangeiro · Rio de Janeiro</span><span>01 / Início</span></p>
-      <h1>IA aplicada, dados e sistemas em <em>produção.</em></h1>
+      <p class="eyebrow"><span>Olá, eu sou</span><span>Rio de Janeiro, Brasil</span></p>
+      <h1><span>Pedro</span> <span class="surname">Grangeiro</span></h1>
+      <p class="hero-role">AI Engineer <span aria-hidden="true">/</span> Desenvolvedor back-end</p>
       <p class="intro">
-        Sou AI Engineer e desenvolvedor back-end. Trabalho principalmente com Python,
-        modelos de linguagem, automação e pipelines que transformam dados dispersos em sistemas confiáveis.
+        Construo soluções com Python, inteligência artificial e dados.
+        Aqui compartilho os projetos, as decisões e os aprendizados por trás de cada sistema.
       </p>
 
       <div class="actions">
-        <a href="/projetos/">Ver projetos <span aria-hidden="true">→</span></a>
-        <a href="/sobre/">Conhecer meu trabalho <span aria-hidden="true">↗</span></a>
+        <a class="primary-action" href="#projetos-destaque">Explorar meus projetos <span aria-hidden="true">→</span></a>
+        <a href={siteConfig.links.linkedin}>Conversar pelo LinkedIn <span aria-hidden="true">↗</span></a>
       </div>
     </div>
 
@@ -46,7 +41,7 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
       <div
         class="mascot"
         role="img"
-        aria-label="Mascote G dev alternando com um retrato de Pedro Grangeiro"
+        aria-label="Mascote G dev, um papagaio verde com símbolo de código"
       >
         <picture class="mascot-layer" aria-hidden="true">
           <source media="(prefers-color-scheme: dark)" srcset={darkMascot.src} />
@@ -60,16 +55,6 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
             fetchpriority="high"
           />
         </picture>
-        <img
-          class="portrait-layer"
-          src={profile.src}
-          width={profile.attributes.width}
-          height={profile.attributes.height}
-          alt=""
-          aria-hidden="true"
-          loading="eager"
-          decoding="async"
-        />
       </div>
       <div class="card-header">
         <p id="focus-title">Áreas de atuação</p>
@@ -83,8 +68,31 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
     </aside>
   </section>
 
+  <section id="projetos-destaque" class="featured" aria-labelledby="featured-title">
+    <header class="section-header" data-reveal><div><p class="kicker">Seleção de trabalhos</p><h2 id="featured-title">Projetos em destaque</h2></div><a href="/projetos/">Todos os projetos →</a></header>
+    <div class="featured-grid" data-reveal-group>{featuredProjects.map((project) => <FeaturedProject entry={project} />)}</div>
+  </section>
+
+  <section class="personal" aria-labelledby="personal-title">
+    <figure class="personal-photo" data-reveal>
+      <Image src={profilePhoto} alt="Retrato de Pedro Grangeiro" widths={[320, 480, 720]}
+        sizes="(max-width: 640px) 240px, 320px" format="webp" loading="lazy" />
+      <figcaption>Pedro Grangeiro · Rio de Janeiro</figcaption>
+    </figure>
+    <div class="personal-copy" data-reveal>
+      <p class="kicker">Além do código</p>
+      <h2 id="personal-title">Prazer, Pedro.</h2>
+      <p>Gosto de decompor problemas grandes em etapas que possam ser entendidas, testadas e melhoradas. É o que conecta meu trabalho com IA, dados e back-end.</p>
+      <p>Estudo Ciência da Computação na UERJ e Análise e Desenvolvimento de Sistemas na UNIFRAN. Este espaço reúne o que construo e o que aprendo pelo caminho.</p>
+      <div class="personal-links">
+        <a href="/sobre/">Mais sobre mim <span aria-hidden="true">→</span></a>
+        <a href={siteConfig.links.github} rel="me">Meu GitHub <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+
   <section class="recent" aria-labelledby="recent-title">
-    <header class="section-header">
+    <header class="section-header" data-reveal>
       <div>
         <p class="kicker">Registro recente</p>
         <h2 id="recent-title">Últimas publicações</h2>
@@ -92,39 +100,11 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
       <a href="/tags/">Explorar por tags →</a>
     </header>
 
-    <div class="content-grid">
-      {recentProjects.map((project) => (
-        <ContentCard
-          href={`/projetos/${project.id}/`}
-          kind="Projeto"
-          title={project.data.title}
-          description={project.data.description}
-          publishedAt={project.data.publishedAt}
-          tags={project.data.stack}
-        />
+    <div class="content-grid" data-reveal-group>
+      {recentContent.map((item) => (
+        <ContentCard href={item.href} kind={item.kind} title={item.title} description={item.description} publishedAt={item.publishedAt} tags={item.tags} status={item.status} />
       ))}
-      {recentPosts.map((post) => (
-        <ContentCard
-          href={`/blog/${post.id}/`}
-          kind="Artigo"
-          title={post.data.title}
-          description={post.data.description}
-          publishedAt={post.data.publishedAt}
-          tags={post.data.tags}
-        />
-      ))}
-      {recentNotes.map((note) => (
-        <ContentCard
-          href={`/pensamentos/${note.id}/`}
-          kind="Pensamento"
-          title={note.data.title}
-          description={note.data.description}
-          publishedAt={note.data.publishedAt}
-          tags={note.data.tags}
-          status={note.data.status}
-        />
-      ))}
-      {!hasRecentContent && (
+      {recentContent.length === 0 && (
         <div class="empty-state"><p>O espaço está pronto para receber as primeiras publicações.</p></div>
       )}
     </div>
@@ -135,9 +115,9 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
   .hero {
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.75fr);
-    gap: clamp(3rem, 8vw, 8rem);
-    align-items: end;
-    padding: clamp(5rem, 12vw, 10rem) 0 clamp(5rem, 10vw, 8rem);
+    gap: clamp(2rem, 4vw, 4rem);
+    align-items: center;
+    padding: clamp(3rem, 6vw, 5.5rem) 0 clamp(4rem, 7vw, 6rem);
   }
 
   .eyebrow {
@@ -155,24 +135,27 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
   }
 
   h1 {
-    max-width: 12ch;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     margin: 0;
-    font-size: clamp(3.5rem, 8vw, 7.4rem);
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
     font-weight: 500;
     letter-spacing: -0.065em;
-    line-height: 0.89;
+    line-height: 0.98;
   }
 
-  h1 em {
+  h1 > span { display: block; }
+
+  h1 .surname {
     color: var(--accent);
     font-weight: inherit;
   }
 
   .intro {
     max-width: 34rem;
-    margin: 2.25rem 0;
+    margin: 1.25rem 0 1.75rem;
     color: var(--ink-soft);
-    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    font-size: clamp(1.05rem, 1.7vw, 1.25rem);
     line-height: 1.65;
   }
 
@@ -198,6 +181,7 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
   }
 
   .focus-card {
+    overflow-wrap: anywhere;
     overflow: hidden;
     border: 1px solid var(--line);
     background: color-mix(in srgb, var(--paper-raised) 92%, transparent);
@@ -217,7 +201,7 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
     position: absolute;
     inset: 0;
     display: block;
-    animation: mascot-reveal 10s ease-in-out infinite;
+
   }
 
   .mascot-layer img {
@@ -227,65 +211,13 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
     object-fit: cover;
   }
 
-  .portrait-layer {
-    position: absolute;
-    top: 21%;
-    left: 21%;
-    display: block;
-    width: 58%;
-    height: 58%;
-    border: clamp(0.28rem, 0.8vw, 0.5rem) solid #162d46;
-    border-radius: 50%;
-    object-fit: cover;
-    object-position: 72% 38%;
-    opacity: 0;
-    box-shadow: 0 1rem 2.5rem rgb(18 31 45 / 0.22);
-    transform: scale(0.84) rotate(-3deg);
-    animation: portrait-reveal 10s ease-in-out infinite;
-  }
 
-  .mascot:hover .mascot-layer,
-  .mascot:hover .portrait-layer {
-    animation-play-state: paused;
-  }
-
-  @keyframes mascot-reveal {
-    0%,
-    38%,
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    48%,
-    88% {
-      opacity: 0;
-      transform: scale(0.96);
-    }
-  }
-
-  @keyframes portrait-reveal {
-    0%,
-    40%,
-    100% {
-      opacity: 0;
-      transform: scale(0.84) rotate(-3deg);
-    }
-
-    50%,
-    86% {
-      opacity: 1;
-      transform: scale(1) rotate(0);
-    }
-
-    94% {
-      opacity: 0;
-      transform: scale(0.92) rotate(2deg);
-    }
-  }
+  .featured { padding-bottom: 5rem; }
+  .featured-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
 
   .card-header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem 1.1rem;
@@ -320,7 +252,7 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
 
   li {
     display: grid;
-    grid-template-columns: 2rem 1fr;
+    grid-template-columns: 1.5rem minmax(0, 1fr);
     gap: 0.2rem 0.75rem;
     padding: 1.25rem 1.1rem;
     border-bottom: 1px solid var(--line);
@@ -346,7 +278,7 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
   }
 
   .recent {
-    padding: 0 0 7rem;
+    padding: 0 0 clamp(3rem, 6vw, 6rem);
   }
 
   .section-header {
@@ -370,14 +302,33 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
     margin-bottom: 0.5rem;
   }
 
-  @media (max-width: 52rem) {
+  @media (max-width: 60rem) {
+    .featured-grid { grid-template-columns: 1fr; }
     .hero {
       grid-template-columns: 1fr;
       align-items: start;
     }
 
     .focus-card {
-      max-width: 32rem;
+      display: grid;
+      grid-template-columns: minmax(12rem, 0.8fr) minmax(0, 1fr);
+      width: 100%;
+    }
+
+    .mascot {
+      grid-row: 1 / 3;
+      align-self: center;
+      border-bottom: 0;
+    }
+
+    .card-header, .focus-card ol {
+      grid-column: 2;
+      border-left: 1px solid var(--line);
+    }
+
+    .hero {
+      padding-top: 2.5rem;
+      padding-bottom: 3.5rem;
     }
   }
 
@@ -387,7 +338,7 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
     }
 
     h1 {
-      font-size: clamp(3.3rem, 18vw, 5rem);
+      font-size: clamp(3.1rem, 13vw, 4.5rem);
     }
 
     .section-header {
@@ -396,14 +347,84 @@ const [lightMascot, darkMascot, profile] = await Promise.all([
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .mascot-layer,
-    .portrait-layer {
-      animation: none;
-    }
 
-    .portrait-layer {
-      opacity: 0;
+  .hero-role {
+    margin: 1.5rem 0 0;
+    color: var(--ink);
+    font: 600 clamp(1.05rem, 1.8vw, 1.35rem)/1.6 var(--ui);
+  }
+
+  .hero-role > span { margin: 0 0.3rem; color: var(--accent); }
+  .actions { align-items: center; }
+  .actions a { min-height: 2.75rem; }
+  .section-header > a { min-height: 2.75rem; }
+  .actions .primary-action {
+    padding: 0.85rem 1.1rem;
+    border: 1px solid var(--accent);
+    color: var(--paper-raised);
+    background: var(--accent);
+    border-radius: 0.25rem;
+    transition: background 180ms ease, border-color 180ms ease;
+  }
+  .actions .primary-action span { color: inherit; }
+  .actions .primary-action:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+
+  .personal {
+    display: grid;
+    grid-template-columns: minmax(0, min(20rem, 32%)) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(2rem, 6vw, 5rem);
+    margin-bottom: 6rem;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+  }
+  .personal-photo { margin: 0; }
+  .personal-photo :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 72% 38%;
+    border-radius: 0.25rem;
+  }
+  .personal-photo figcaption { margin-top: 0.75rem; color: var(--muted); font: 500 0.72rem/1.5 var(--mono); }
+  .personal-copy h2 { margin: 0 0 1rem; font-size: clamp(2.3rem, 5vw, 4rem); font-weight: 500; letter-spacing: -0.04em; }
+  .personal-copy > p:not(.kicker) { max-width: 55ch; color: var(--ink-soft); font-size: 1.1rem; line-height: 1.75; }
+  .personal-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+  .personal-links a { display: inline-flex; align-items: center; gap: 0.7rem; min-height: 2.75rem; color: var(--accent-strong); font: 700 0.85rem/1.5 var(--ui); text-underline-offset: 0.25em; }
+
+  @media (max-width: 52rem) {
+    .personal { grid-template-columns: 1fr; }
+    .personal-photo { max-width: 15rem; }
+  }
+
+  @media (max-width: 40rem) {
+    .focus-card { display: block; }
+    .mascot { width: min(100%, 18rem); margin: 0 auto; }
+    .card-header, .focus-card ol { border-left: 0; }
+    .card-header { border-top: 1px solid var(--line); }
+    .actions { display: grid; grid-template-columns: 1fr; gap: 0.65rem; }
+    .actions a { justify-content: center; width: 100%; padding: 0.75rem; font-size: 0.9rem; }
+    .hero { gap: 2rem; }
+    .featured { padding-bottom: 3rem; }
+    .personal { padding: 0.75rem; gap: 1.5rem; margin-bottom: 3rem; }
+    .personal-photo { justify-self: center; width: min(100%, 15rem); }
+    .personal-copy > p:not(.kicker) { font-size: 1rem; }
+    .personal-links { gap: 0.5rem 1rem; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-copy > *, .focus-card { animation: hero-enter 600ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+    .hero-copy > h1 { animation-delay: 60ms; }
+    .hero-copy > .hero-role { animation-delay: 120ms; }
+    .hero-copy > .intro { animation-delay: 180ms; }
+    .hero-copy > .actions { animation-delay: 240ms; }
+    .focus-card { animation-delay: 160ms; }
+    @keyframes hero-enter {
+      from { opacity: 0; translate: 0 0.75rem; }
+      to { opacity: 1; translate: 0 0; }
     }
   }
 </style>

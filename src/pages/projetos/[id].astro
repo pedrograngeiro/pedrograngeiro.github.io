@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { getCollection, render } from 'astro:content';
 import ContentLayout from '../../layouts/ContentLayout.astro';
 import { isVisible } from '../../lib/content';
+import { Image } from 'astro:assets';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects', isVisible);
@@ -31,7 +32,7 @@ const { Content } = await render(entry);
   backHref="/projetos/"
   backLabel="Projetos"
 >
-  {(entry.data.role || entry.data.stack.length > 0 || entry.data.outcome || entry.data.repository || entry.data.demo) && (
+  {(entry.data.role || entry.data.stack.length > 0 || entry.data.outcome || entry.data.repository || entry.data.demo || entry.data.article) && (
     <div slot="details" class="project-details">
       {(entry.data.role || entry.data.stack.length > 0 || entry.data.outcome) && (
         <dl class="project-facts">
@@ -40,15 +41,20 @@ const { Content } = await render(entry);
           {entry.data.outcome && <div><dt>Resultado</dt><dd>{entry.data.outcome}</dd></div>}
         </dl>
       )}
-      {(entry.data.repository || entry.data.demo) && (
+      {(entry.data.repository || entry.data.demo || entry.data.article) && (
         <div class="project-links">
           {entry.data.repository && <a href={entry.data.repository}>Ver repositório <span aria-hidden="true">↗</span></a>}
+          {entry.data.article && <a href={entry.data.article}>Ver explicação técnica <span aria-hidden="true">↗</span></a>}
           {entry.data.demo && <a href={entry.data.demo}>Abrir demonstração <span aria-hidden="true">↗</span></a>}
         </div>
       )}
     </div>
   )}
 
+  {entry.data.cover && <figure>
+    <Image src={entry.data.cover} alt={entry.data.coverAlt ?? entry.data.title} widths={[720, 1080]} sizes="(max-width: 768px) calc(100vw - 2rem), 736px" />
+    {entry.data.coverCaption && <figcaption>{entry.data.coverCaption}</figcaption>}
+  </figure>}
   <Content />
 </ContentLayout>
 
@@ -94,6 +100,10 @@ const { Content } = await render(entry);
   }
 
   .project-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
     padding-bottom: 0.25rem;
     border-bottom: 1px solid var(--ink);
     color: var(--ink);
@@ -105,7 +115,7 @@ const { Content } = await render(entry);
     color: var(--accent);
   }
 
-  @media (max-width: 38rem) {
+  @media (max-width: 48rem) {
     .project-facts {
       grid-template-columns: 1fr;
     }
